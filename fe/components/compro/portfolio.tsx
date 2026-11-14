@@ -134,10 +134,10 @@ export default function Portfolio({ data, categories }: PortfolioProps) {
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>("all");
 
   const displayList: DisplayPortfolioItem[] = (() => {
-    if (!data || data.length === 0) {
+    if (data === undefined) {
       return DEFAULT_PORTFOLIO_ITEMS;
     }
-    const mapped = data.map((item, idx) => {
+    return data.map((item, idx) => {
       const catInfo = normalizeCategory(item.category);
       return {
         id: item.id || `pf-${idx}`,
@@ -152,14 +152,6 @@ export default function Portfolio({ data, categories }: PortfolioProps) {
         badgeLabel: catInfo.label,
       };
     });
-
-    // Pastikan jika database backend belum memiliki portofolio Software Solution, tampilkan item unggulan default
-    const hasSoftware = mapped.some((item) => item.category === "software");
-    if (!hasSoftware) {
-      const defaultSoftware = DEFAULT_PORTFOLIO_ITEMS.filter((item) => item.category === "software");
-      return [...defaultSoftware, ...mapped];
-    }
-    return mapped;
   })();
 
   const filteredItems = displayList.filter((item) => {

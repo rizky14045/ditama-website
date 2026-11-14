@@ -115,16 +115,16 @@ function parseBullets(raw: string | undefined): string[] {
 
 export default function Services({ data }: ServicesProps) {
   const serviceList =
-    data && data.length > 0
-      ? data.map((item, idx) => ({
+    data === undefined
+      ? DEFAULT_SERVICES
+      : data.map((item, idx) => ({
           id: item.id || `srv-${idx}`,
           title: item.title,
           slug: item.slug || "",
           short_description: item.short_description,
           bullets: parseBullets(item.bullet_features),
           display_order: item.display_order ?? idx + 1,
-        }))
-      : DEFAULT_SERVICES;
+        }));
 
   return (
     <section id="layanan" className="py-16 lg:py-24 bg-icegray border-y border-slate-200/80">

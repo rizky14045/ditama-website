@@ -20,16 +20,19 @@ interface TechPartnersProps {
 }
 
 export default function TechPartners({ data }: TechPartnersProps) {
-  const partners: ClientPartnerData[] = data && data.length > 0
-    ? data
-    : DEFAULT_PARTNERS.map((p, idx) => ({
-        id: `default-partner-${idx}`,
-        name: p.name,
-        type: "TECH_PARTNER" as const,
-        logo_url: "",
-        website_url: "",
-        display_order: idx + 1,
-      }));
+  const partners: ClientPartnerData[] =
+    data === undefined
+      ? DEFAULT_PARTNERS.map((p, idx) => ({
+          id: `default-partner-${idx}`,
+          name: p.name,
+          type: "TECH_PARTNER" as const,
+          logo_url: "",
+          website_url: "",
+          display_order: idx + 1,
+        }))
+      : data;
+
+  if (partners.length === 0) return null;
 
   return (
     <section

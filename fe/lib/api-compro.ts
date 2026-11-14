@@ -1,18 +1,27 @@
 import axios from "axios";
 
+export const getDynamicApiBaseUrl = (): string => {
+  if (typeof window !== "undefined") {
+    return "/api/v1";
+  }
+  return process.env.INTERNAL_API_URL || "http://localhost:8070/api/v1";
+};
+
 export const comproApi = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_API_URL ||
-    (typeof window !== "undefined" ? "/api/v1" : "http://localhost:8070/api/v1"),
+  baseURL: typeof window !== "undefined" ? "/api/v1" : (process.env.INTERNAL_API_URL || "http://localhost:8070/api/v1"),
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 8000,
+  timeout: 10000,
 });
 
 // Attach token from sessionStorage or localStorage if available
 comproApi.interceptors.request.use(async (config) => {
   if (typeof window !== "undefined") {
+    // Normalisasi baseURL di browser agar selalu relative /api/v1 (bebas CORS & Mixed Content)
+    if (!config.baseURL || config.baseURL.includes("localhost:8070") || config.baseURL.startsWith("http://localhost")) {
+      config.baseURL = "/api/v1";
+    }
     let token = localStorage.getItem("ditama_admin_token") || sessionStorage.getItem("ditama_admin_token");
     if (!token) {
       try {
@@ -169,10 +178,6 @@ export async function fetchComproHomeData(): Promise<ComproHomeResponse | null> 
   try {
     const res = await comproApi.get("/public/home", {
       params: { _t: Date.now() },
-      headers: {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        Pragma: "no-cache",
-      },
     });
     if (res.data && res.data.status && res.data.data) {
       return res.data.data as ComproHomeResponse;
@@ -338,7 +343,6 @@ export async function getAdminPortfolios(): Promise<PortfolioData[]> {
   try {
     const res = await comproApi.get("/admin/sections/portfolios", {
       params: { _t: Date.now() },
-      headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
     });
     if (res.data && res.data.status && Array.isArray(res.data.data)) return res.data.data;
     return [];
@@ -553,10 +557,6 @@ export async function getPublicServiceCategories(): Promise<ServiceCategoryData[
   try {
     const res = await comproApi.get("/public/service-categories", {
       params: { _t: Date.now() },
-      headers: {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        Pragma: "no-cache",
-      },
     });
     if (res.data && res.data.status && Array.isArray(res.data.data) && res.data.data.length > 0) {
       return res.data.data;
@@ -572,7 +572,6 @@ export async function getAdminServiceCategories(): Promise<ServiceCategoryData[]
   try {
     const res = await comproApi.get("/admin/sections/categories", {
       params: { _t: Date.now() },
-      headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
     });
     if (res.data && res.data.status && Array.isArray(res.data.data) && res.data.data.length > 0) {
       return res.data.data;

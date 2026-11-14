@@ -46,25 +46,25 @@ func (h *Handler) GetHomeSections(c *gin.Context) {
 
 	// 2. Hero Section
 	var hero models.HeroSection
-	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").First(&hero).Error; err == nil && hero.HeadlineH1 != "" {
+	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").First(&hero).Error; err == nil {
 		data["hero"] = hero
 	}
 
 	// 3. About Section
 	var about models.AboutSection
-	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").First(&about).Error; err == nil && about.Title != "" {
+	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").First(&about).Error; err == nil {
 		data["about"] = about
 	}
 
 	// 4. Certifications & Legalities
 	var certs []models.CertificationLegality
-	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&certs).Error; err == nil && len(certs) > 0 {
+	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&certs).Error; err == nil {
 		data["certifications_legalities"] = certs
 	}
 
 	// 5. Services
 	var services []models.Service
-	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&services).Error; err == nil && len(services) > 0 {
+	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&services).Error; err == nil {
 		data["services"] = services
 	}
 
@@ -78,15 +78,15 @@ func (h *Handler) GetHomeSections(c *gin.Context) {
 
 	// 6. Portfolios
 	var portfolios []models.Portfolio
-	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&portfolios).Error; err == nil && len(portfolios) > 0 {
+	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&portfolios).Error; err == nil {
 		data["portfolios"] = portfolios
 	}
 
 	// 7. Clients & Partners
 	var allPartners []models.ClientPartner
-	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&allPartners).Error; err == nil && len(allPartners) > 0 {
-		var clients []models.ClientPartner
-		var techPartners []models.ClientPartner
+	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&allPartners).Error; err == nil {
+		clients := make([]models.ClientPartner, 0)
+		techPartners := make([]models.ClientPartner, 0)
 		for _, p := range allPartners {
 			if strings.ToUpper(p.Type) == "CLIENT" {
 				clients = append(clients, p)
@@ -100,7 +100,7 @@ func (h *Handler) GetHomeSections(c *gin.Context) {
 
 	// 8. CTA Banner
 	var cta models.CtaBanner
-	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").First(&cta).Error; err == nil && cta.Headline != "" {
+	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").First(&cta).Error; err == nil {
 		data["cta_banner"] = cta
 	}
 

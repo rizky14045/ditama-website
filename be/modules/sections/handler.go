@@ -313,7 +313,7 @@ func (h *Handler) ListServices(c *gin.Context) {
 		return
 	}
 	var services []models.Service
-	if err := h.DB.Where("deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&services).Error; err != nil || len(services) == 0 {
+	if err := h.DB.Where("deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&services).Error; err != nil {
 		helper.JsonResponse(c, true, "Services retrieved (fallback storage)", getDefaultServicesList(), nil, http.StatusOK)
 		return
 	}
@@ -454,9 +454,11 @@ func (h *Handler) DeleteService(c *gin.Context) {
 	}
 
 	existing.DeletedBy = getUserUUID(c)
-	now := time.Now()
-	existing.DeletedAt = gorm.DeletedAt{Time: now, Valid: true}
-	h.DB.Save(&existing)
+	_ = h.DB.Model(&existing).Update("deleted_by", existing.DeletedBy)
+	if err := h.DB.Delete(&existing).Error; err != nil {
+		helper.JsonResponse(c, false, "Failed to delete service", nil, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	items := getDefaultServicesList()
 	var updated []models.Service
@@ -565,7 +567,7 @@ func (h *Handler) ListPortfolios(c *gin.Context) {
 		return
 	}
 	var items []models.Portfolio
-	if err := h.DB.Where("deleted_at IS NULL").Order("display_order ASC, created_at DESC").Find(&items).Error; err != nil || len(items) == 0 {
+	if err := h.DB.Where("deleted_at IS NULL").Order("display_order ASC, created_at DESC").Find(&items).Error; err != nil {
 		helper.JsonResponse(c, true, "Portfolios retrieved (fallback storage)", getDefaultPortfoliosList(), nil, http.StatusOK)
 		return
 	}
@@ -719,9 +721,11 @@ func (h *Handler) DeletePortfolio(c *gin.Context) {
 	}
 
 	existing.DeletedBy = getUserUUID(c)
-	now := time.Now()
-	existing.DeletedAt = gorm.DeletedAt{Time: now, Valid: true}
-	h.DB.Save(&existing)
+	_ = h.DB.Model(&existing).Update("deleted_by", existing.DeletedBy)
+	if err := h.DB.Delete(&existing).Error; err != nil {
+		helper.JsonResponse(c, false, "Failed to delete portfolio", nil, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	items := getDefaultPortfoliosList()
 	var updated []models.Portfolio
@@ -821,9 +825,11 @@ func (h *Handler) DeleteLegality(c *gin.Context) {
 	}
 
 	existing.DeletedBy = getUserUUID(c)
-	now := time.Now()
-	existing.DeletedAt = gorm.DeletedAt{Time: now, Valid: true}
-	h.DB.Save(&existing)
+	_ = h.DB.Model(&existing).Update("deleted_by", existing.DeletedBy)
+	if err := h.DB.Delete(&existing).Error; err != nil {
+		helper.JsonResponse(c, false, "Failed to delete legality", nil, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	auditlog.LogEvent(h.DB, c, "SOFT_DELETE", "certifications_legalities", id, existing, nil)
 	helper.JsonResponse(c, true, "Deleted successfully", nil, nil, http.StatusOK)
@@ -1033,9 +1039,11 @@ func (h *Handler) DeletePartner(c *gin.Context) {
 	}
 
 	existing.DeletedBy = getUserUUID(c)
-	now := time.Now()
-	existing.DeletedAt = gorm.DeletedAt{Time: now, Valid: true}
-	h.DB.Save(&existing)
+	_ = h.DB.Model(&existing).Update("deleted_by", existing.DeletedBy)
+	if err := h.DB.Delete(&existing).Error; err != nil {
+		helper.JsonResponse(c, false, "Failed to delete partner", nil, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	// Also sync to file
 	items := getDefaultPartnersList()

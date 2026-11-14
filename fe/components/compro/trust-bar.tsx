@@ -18,16 +18,19 @@ interface TrustBarProps {
 }
 
 export default function TrustBar({ data }: TrustBarProps) {
-  const clients: ClientPartnerData[] = data && data.length > 0
-    ? data
-    : DEFAULT_CLIENTS.map((name, idx) => ({
-        id: `default-client-${idx}`,
-        name,
-        type: "CLIENT" as const,
-        logo_url: "",
-        website_url: "",
-        display_order: idx + 1,
-      }));
+  const clients: ClientPartnerData[] =
+    data === undefined
+      ? DEFAULT_CLIENTS.map((name, idx) => ({
+          id: `default-client-${idx}`,
+          name,
+          type: "CLIENT" as const,
+          logo_url: "",
+          website_url: "",
+          display_order: idx + 1,
+        }))
+      : data;
+
+  if (clients.length === 0) return null;
 
   return (
     <section
