@@ -1,17 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { PortfolioData } from "@/lib/api-compro";
+import { PortfolioData, ServiceCategoryData, DEFAULT_SERVICE_CATEGORIES } from "@/lib/api-compro";
 
-type CategoryFilter = "all" | "it" | "gate" | "supplier";
+type CategoryFilter = string;
 
 interface PortfolioProps {
   data?: PortfolioData[];
+  categories?: ServiceCategoryData[];
 }
 
 interface DisplayPortfolioItem {
   id: string;
-  category: "it" | "gate" | "supplier";
+  category: string;
   categoryLabel: string;
   client: string;
   title: string;
@@ -25,8 +26,8 @@ interface DisplayPortfolioItem {
 const DEFAULT_PORTFOLIO_ITEMS: DisplayPortfolioItem[] = [
   {
     id: "pln-sidak",
-    category: "it",
-    categoryLabel: "IT & Software",
+    category: "software",
+    categoryLabel: "Software Solution",
     client: "PT. PLN Nusantara Power",
     title: "E-Preventive Maintenance & SIDAK AI",
     description:
@@ -37,8 +38,8 @@ const DEFAULT_PORTFOLIO_ITEMS: DisplayPortfolioItem[] = [
   },
   {
     id: "semen-gresik",
-    category: "gate",
-    categoryLabel: "Gate & Security",
+    category: "security",
+    categoryLabel: "Security System",
     client: "PT. Semen Gresik Rembang Tbk.",
     title: "Turnstile Full High & People Counting",
     description:
@@ -49,8 +50,8 @@ const DEFAULT_PORTFOLIO_ITEMS: DisplayPortfolioItem[] = [
   },
   {
     id: "gleneagles-hospital",
-    category: "gate",
-    categoryLabel: "Gate & Security",
+    category: "security",
+    categoryLabel: "Security System",
     client: "Gleneagles KL & Likas Hospital",
     title: "Access Control & Radiation Protection",
     description:
@@ -61,8 +62,8 @@ const DEFAULT_PORTFOLIO_ITEMS: DisplayPortfolioItem[] = [
   },
   {
     id: "pln-muara-karang",
-    category: "gate",
-    categoryLabel: "Gate & Security",
+    category: "security",
+    categoryLabel: "Security System",
     client: "PT. PLN Nusantara Power UP Muara Karang",
     title: "Barrier Gate & CCTV Maintenance",
     description:
@@ -73,8 +74,8 @@ const DEFAULT_PORTFOLIO_ITEMS: DisplayPortfolioItem[] = [
   },
   {
     id: "shopee-office",
-    category: "gate",
-    categoryLabel: "Gate & Security",
+    category: "security",
+    categoryLabel: "Security System",
     client: "PT. Shopee Office",
     title: "Instalasi Access Door Kantor Pusat",
     description:
@@ -85,8 +86,8 @@ const DEFAULT_PORTFOLIO_ITEMS: DisplayPortfolioItem[] = [
   },
   {
     id: "krakatau-posco",
-    category: "supplier",
-    categoryLabel: "Supplier & Elektrikal",
+    category: "integrator",
+    categoryLabel: "System Integrator",
     client: "PT. Krakatau Posco",
     title: "Fabrication Pondation & Pipe Rack 6KV",
     description:
@@ -97,19 +98,21 @@ const DEFAULT_PORTFOLIO_ITEMS: DisplayPortfolioItem[] = [
   },
 ];
 
-function normalizeCategory(cat: string): { key: "it" | "gate" | "supplier"; label: string; gradient: string } {
+function normalizeCategory(cat: string): { key: "software" | "security" | "integrator"; label: string; gradient: string } {
   const upper = (cat || "").toUpperCase();
-  if (upper.includes("IT") || upper.includes("SOFTWARE") || upper.includes("APP")) {
-    return { key: "it", label: "IT & Software", gradient: "from-navy to-navy-light" };
+  if (upper.includes("SOFTWARE") || upper.includes("IT") || upper.includes("APP")) {
+    return { key: "software", label: "Software Solution", gradient: "from-navy to-navy-light" };
   }
-  if (upper.includes("SUPPLIER") || upper.includes("ELECTRICAL") || upper.includes("LISTRIK")) {
-    return { key: "supplier", label: "Supplier & Elektrikal", gradient: "from-slate-800 to-navy-dark" };
+  if (upper.includes("SECURITY") || upper.includes("GATE") || upper.includes("CCTV") || upper.includes("ACCESS") || upper.includes("TURNSTILE")) {
+    return { key: "security", label: "Security System", gradient: "from-slate-800 to-navy" };
   }
-  return { key: "gate", label: "Gate & Security", gradient: "from-navy-dark to-navy" };
+  return { key: "integrator", label: "System Integrator", gradient: "from-slate-800 to-navy-dark" };
 }
 
-export default function Portfolio({ data }: PortfolioProps) {
+export default function Portfolio({ data, categories }: PortfolioProps) {
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>("all");
+
+  const activeCategories = categories && categories.length > 0 ? categories : DEFAULT_SERVICE_CATEGORIES;
 
   const displayList: DisplayPortfolioItem[] =
     data && data.length > 0
@@ -130,9 +133,10 @@ export default function Portfolio({ data }: PortfolioProps) {
         })
       : DEFAULT_PORTFOLIO_ITEMS;
 
-  const filteredItems = displayList.filter(
-    (item) => activeFilter === "all" || item.category === activeFilter
-  );
+  const filteredItems = displayList.filter((item) => {
+    if (activeFilter === "all") return true;
+    return item.category === activeFilter;
+  });
 
   return (
     <section id="portofolio" className="py-16 lg:py-24 bg-white">
@@ -164,39 +168,24 @@ export default function Portfolio({ data }: PortfolioProps) {
             >
               Semua
             </button>
-            <button
-              type="button"
-              onClick={() => setActiveFilter("it")}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-heading transition-all cursor-pointer ${
-                activeFilter === "it"
-                  ? "bg-amberbrand text-navy-dark font-bold shadow-xs"
-                  : "bg-icegray text-slate-700 font-semibold hover:bg-slate-200"
-              }`}
-            >
-              IT &amp; Software
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveFilter("gate")}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-heading transition-all cursor-pointer ${
-                activeFilter === "gate"
-                  ? "bg-amberbrand text-navy-dark font-bold shadow-xs"
-                  : "bg-icegray text-slate-700 font-semibold hover:bg-slate-200"
-              }`}
-            >
-              Gate &amp; Security
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveFilter("supplier")}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-heading transition-all cursor-pointer ${
-                activeFilter === "supplier"
-                  ? "bg-amberbrand text-navy-dark font-bold shadow-xs"
-                  : "bg-icegray text-slate-700 font-semibold hover:bg-slate-200"
-              }`}
-            >
-              Supplier &amp; Elektrikal
-            </button>
+            {activeCategories.map((cat) => {
+              const catKey = normalizeCategory(cat.code || cat.name).key;
+              const isActive = activeFilter === catKey;
+              return (
+                <button
+                  key={cat.id || cat.code}
+                  type="button"
+                  onClick={() => setActiveFilter(catKey)}
+                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-heading transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-amberbrand text-navy-dark font-bold shadow-xs"
+                      : "bg-icegray text-slate-700 font-semibold hover:bg-slate-200"
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              );
+            })}
           </div>
         </div>
 

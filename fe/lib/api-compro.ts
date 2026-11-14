@@ -99,12 +99,27 @@ export interface ServiceData {
   display_order: number;
 }
 
+export interface ServiceCategoryData {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  display_order?: number;
+  is_active?: boolean;
+}
+
+export const DEFAULT_SERVICE_CATEGORIES: ServiceCategoryData[] = [
+  { id: "cat-1", code: "SOFTWARE_SOLUTION", name: "Software Solution", description: "Aplikasi Web, Mobile, AI Analytics & Enterprise ERP", display_order: 1, is_active: true },
+  { id: "cat-2", code: "SECURITY_SYSTEM", name: "Security System", description: "Turnstile Gate, Barrier Gate, RFID Access Control & CCTV", display_order: 2, is_active: true },
+  { id: "cat-3", code: "SYSTEM_INTEGRATOR", name: "System Integrator", description: "Integrasi Sistem Industri, Mekanikal, Elektrikal & Standar K3", display_order: 3, is_active: true },
+];
+
 export interface PortfolioData {
   id: string;
   title: string;
   slug: string;
   client_name: string;
-  category: "IT_SOFTWARE" | "GATE_SECURITY" | "SUPPLIER_ELECTRICAL";
+  category: "SOFTWARE_SOLUTION" | "SECURITY_SYSTEM" | "SYSTEM_INTEGRATOR" | string;
   summary: string;
   challenge_solution_detail?: string;
   thumbnail_url?: string;
@@ -134,6 +149,7 @@ export interface ComproHomeResponse {
   hero?: HeroData;
   about?: AboutData;
   certifications_legalities?: CertificationLegalityData[];
+  service_categories?: ServiceCategoryData[];
   services?: ServiceData[];
   portfolios?: PortfolioData[];
   clients?: ClientPartnerData[];
@@ -519,5 +535,60 @@ export async function getAdminAuditLogs(): Promise<AdminAuditLogItem[]> {
   } catch (error) {
     console.error("Failed to fetch admin audit logs", error);
     return [];
+  }
+}
+
+// ----------------- SERVICE CATEGORIES MASTER DATA API -----------------
+
+export async function getPublicServiceCategories(): Promise<ServiceCategoryData[]> {
+  try {
+    const res = await comproApi.get("/public/service-categories");
+    if (res.data && res.data.status && Array.isArray(res.data.data) && res.data.data.length > 0) {
+      return res.data.data;
+    }
+    return DEFAULT_SERVICE_CATEGORIES;
+  } catch (error) {
+    console.warn("Notice: failed to fetch public service categories, using default.", error);
+    return DEFAULT_SERVICE_CATEGORIES;
+  }
+}
+
+export async function getAdminServiceCategories(): Promise<ServiceCategoryData[]> {
+  try {
+    const res = await comproApi.get("/admin/sections/categories");
+    if (res.data && res.data.status && Array.isArray(res.data.data) && res.data.data.length > 0) {
+      return res.data.data;
+    }
+    return DEFAULT_SERVICE_CATEGORIES;
+  } catch (error) {
+    console.warn("Notice: failed to fetch admin service categories, using default fallback.", error);
+    return DEFAULT_SERVICE_CATEGORIES;
+  }
+}
+
+export async function createAdminServiceCategory(payload: Partial<ServiceCategoryData>): Promise<{ success: boolean; message: string }> {
+  try {
+    const res = await comproApi.post("/admin/sections/categories", payload);
+    return { success: res.data?.status ?? true, message: res.data?.message || "Kategori layanan berhasil ditambahkan." };
+  } catch (error: any) {
+    return { success: false, message: error?.response?.data?.message || "Gagal menambah kategori layanan." };
+  }
+}
+
+export async function updateAdminServiceCategory(id: string, payload: Partial<ServiceCategoryData>): Promise<{ success: boolean; message: string }> {
+  try {
+    const res = await comproApi.put(`/admin/sections/categories/${id}`, payload);
+    return { success: res.data?.status ?? true, message: res.data?.message || "Kategori layanan berhasil diperbarui." };
+  } catch (error: any) {
+    return { success: false, message: error?.response?.data?.message || "Gagal mengubah kategori layanan." };
+  }
+}
+
+export async function deleteAdminServiceCategory(id: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const res = await comproApi.delete(`/admin/sections/categories/${id}`);
+    return { success: res.data?.status ?? true, message: res.data?.message || "Kategori layanan berhasil dihapus." };
+  } catch (error: any) {
+    return { success: false, message: error?.response?.data?.message || "Gagal menghapus kategori layanan." };
   }
 }

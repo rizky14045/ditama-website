@@ -37,6 +37,7 @@ func main() {
 			&models.HeroSection{},
 			&models.AboutSection{},
 			&models.CertificationLegality{},
+			&models.ServiceCategory{},
 			&models.Service{},
 			&models.Portfolio{},
 			&models.ClientPartner{},

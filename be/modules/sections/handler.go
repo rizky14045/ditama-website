@@ -1138,10 +1138,196 @@ func (h *Handler) UpdateCta(c *gin.Context) {
 	helper.JsonResponse(c, true, "CTA banner updated", existing, nil, http.StatusOK)
 }
 
+// ----------------- SERVICE CATEGORIES (MASTER DATA) -----------------
+
+const serviceCategoriesFilePath = "data/service_categories.json"
+
+func getDefaultServiceCategories() []models.ServiceCategory {
+	cats := []models.ServiceCategory{
+		{
+			Code:         "SOFTWARE_SOLUTION",
+			Name:         "Software Solution",
+			Description:  "Pengembangan aplikasi web, mobile app, kecerdasan buatan (AI analytics), dan sistem enterprise ERP.",
+			DisplayOrder: 1,
+			IsActive:     true,
+		},
+		{
+			Code:         "SECURITY_SYSTEM",
+			Name:         "Security System",
+			Description:  "Sistem pengamanan gerbang fisik pintar (Turnstile Full Height, Barrier Gate), Access Control RFID, dan CCTV Surveillance terpadu.",
+			DisplayOrder: 2,
+			IsActive:     true,
+		},
+		{
+			Code:         "SYSTEM_INTEGRATOR",
+			Name:         "System Integrator",
+			Description:  "Integrasi sistem industri, otomasi SCADA, pengadaan peralatan keselamatan kerja (K3), serta suplai mekanikal elektrikal.",
+			DisplayOrder: 3,
+			IsActive:     true,
+		},
+	}
+	if content, err := os.ReadFile(serviceCategoriesFilePath); err == nil {
+		var list []models.ServiceCategory
+		if err := json.Unmarshal(content, &list); err == nil && len(list) > 0 {
+			return list
+		}
+	}
+	return cats
+}
+
+func saveServiceCategoriesToFile(cats []models.ServiceCategory) {
+	_ = os.MkdirAll("data", 0755)
+	if data, err := json.MarshalIndent(cats, "", "  "); err == nil {
+		_ = os.WriteFile(serviceCategoriesFilePath, data, 0644)
+	}
+}
+
+func (h *Handler) ListServiceCategories(c *gin.Context) {
+	if h.DB == nil {
+		helper.JsonResponse(c, true, "Loaded service categories from storage", getDefaultServiceCategories(), nil, http.StatusOK)
+		return
+	}
+	var cats []models.ServiceCategory
+	if err := h.DB.Where("deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&cats).Error; err != nil {
+		helper.JsonResponse(c, true, "Loaded default service categories", getDefaultServiceCategories(), nil, http.StatusOK)
+		return
+	}
+	if len(cats) == 0 {
+		cats = getDefaultServiceCategories()
+	}
+	helper.JsonResponse(c, true, "Service categories fetched", cats, nil, http.StatusOK)
+}
+
+func (h *Handler) CreateServiceCategory(c *gin.Context) {
+	var req struct {
+		Code         string `json:"code"`
+		Name         string `json:"name" binding:"required"`
+		Description  string `json:"description"`
+		DisplayOrder int    `json:"display_order"`
+		IsActive     *bool  `json:"is_active"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		helper.JsonResponse(c, false, "Invalid request", nil, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	code := strings.TrimSpace(req.Code)
+	if code == "" {
+		code = strings.ToUpper(strings.ReplaceAll(strings.TrimSpace(req.Name), " ", "_"))
+	}
+
+	isActive := true
+	if req.IsActive != nil {
+		isActive = *req.IsActive
+	}
+
+	newCat := models.ServiceCategory{
+		Code:         code,
+		Name:         strings.TrimSpace(req.Name),
+		Description:  strings.TrimSpace(req.Description),
+		DisplayOrder: req.DisplayOrder,
+		IsActive:     isActive,
+	}
+	newCat.CreatedBy = getUserUUID(c)
+
+	if h.DB != nil {
+		if err := h.DB.Create(&newCat).Error; err != nil {
+			helper.JsonResponse(c, false, "Failed to create service category", nil, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		auditlog.LogEvent(h.DB, c, "CREATE", "service_categories", newCat.ID.String(), nil, newCat)
+	}
+
+	cats := getDefaultServiceCategories()
+	cats = append(cats, newCat)
+	saveServiceCategoriesToFile(cats)
+
+	helper.JsonResponse(c, true, "Service category created successfully", newCat, nil, http.StatusCreated)
+}
+
+func (h *Handler) UpdateServiceCategory(c *gin.Context) {
+	idParam := c.Param("id")
+	targetID, err := uuid.Parse(idParam)
+	if err != nil {
+		helper.JsonResponse(c, false, "Invalid UUID parameter", nil, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var req struct {
+		Code         string `json:"code"`
+		Name         string `json:"name"`
+		Description  string `json:"description"`
+		DisplayOrder int    `json:"display_order"`
+		IsActive     *bool  `json:"is_active"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		helper.JsonResponse(c, false, "Invalid request payload", nil, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if h.DB != nil {
+		var existing models.ServiceCategory
+		if err := h.DB.First(&existing, "id = ? AND deleted_at IS NULL", targetID).Error; err != nil {
+			helper.JsonResponse(c, false, "Service category not found", nil, err.Error(), http.StatusNotFound)
+			return
+		}
+		before := existing
+		if req.Name != "" {
+			existing.Name = strings.TrimSpace(req.Name)
+		}
+		if req.Code != "" {
+			existing.Code = strings.TrimSpace(req.Code)
+		}
+		existing.Description = strings.TrimSpace(req.Description)
+		existing.DisplayOrder = req.DisplayOrder
+		if req.IsActive != nil {
+			existing.IsActive = *req.IsActive
+		}
+		existing.UpdatedBy = getUserUUID(c)
+
+		if err := h.DB.Save(&existing).Error; err != nil {
+			helper.JsonResponse(c, false, "Failed to update category", nil, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		auditlog.LogEvent(h.DB, c, "UPDATE", "service_categories", existing.ID.String(), before, existing)
+		helper.JsonResponse(c, true, "Service category updated successfully", existing, nil, http.StatusOK)
+		return
+	}
+	helper.JsonResponse(c, true, "Category updated (in-memory)", req, nil, http.StatusOK)
+}
+
+func (h *Handler) DeleteServiceCategory(c *gin.Context) {
+	idParam := c.Param("id")
+	targetID, err := uuid.Parse(idParam)
+	if err != nil {
+		helper.JsonResponse(c, false, "Invalid UUID", nil, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if h.DB != nil {
+		var existing models.ServiceCategory
+		if err := h.DB.First(&existing, "id = ? AND deleted_at IS NULL", targetID).Error; err != nil {
+			helper.JsonResponse(c, false, "Service category not found", nil, err.Error(), http.StatusNotFound)
+			return
+		}
+		existing.DeletedBy = getUserUUID(c)
+		_ = h.DB.Save(&existing)
+		_ = h.DB.Delete(&existing)
+		auditlog.LogEvent(h.DB, c, "DELETE", "service_categories", existing.ID.String(), existing, nil)
+	}
+	helper.JsonResponse(c, true, "Service category deleted successfully", nil, nil, http.StatusOK)
+}
+
 func SetupRoutes(rg *gin.RouterGroup, db *gorm.DB) {
 	h := NewHandler(db)
 	sec := rg.Group("/admin/sections", middleware.JWTMiddleware())
 	{
+		// Service Categories Master Data
+		sec.GET("/categories", h.ListServiceCategories)
+		sec.POST("/categories", h.CreateServiceCategory)
+		sec.PUT("/categories/:id", h.UpdateServiceCategory)
+		sec.DELETE("/categories/:id", h.DeleteServiceCategory)
+
 		// Hero
 		sec.GET("/hero", h.GetHero)
 		sec.PUT("/hero", h.UpdateHero)

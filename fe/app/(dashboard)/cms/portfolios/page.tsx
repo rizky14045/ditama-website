@@ -11,12 +11,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { getAdminPortfolios, createAdminPortfolio, updateAdminPortfolio, deleteAdminPortfolio, PortfolioData } from "@/lib/api-compro";
+import {
+  getAdminPortfolios,
+  createAdminPortfolio,
+  updateAdminPortfolio,
+  deleteAdminPortfolio,
+  getAdminServiceCategories,
+  PortfolioData,
+  ServiceCategoryData,
+  DEFAULT_SERVICE_CATEGORIES,
+} from "@/lib/api-compro";
 import { Icon } from "@iconify/react";
 import ImageUploadDropzone from "@/components/common/image-upload-dropzone";
 
 export default function CmsPortfoliosPage() {
   const [portfolios, setPortfolios] = useState<PortfolioData[]>([]);
+  const [categories, setCategories] = useState<ServiceCategoryData[]>(DEFAULT_SERVICE_CATEGORIES);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<PortfolioData | null>(null);
@@ -27,7 +37,7 @@ export default function CmsPortfoliosPage() {
     title: string;
     slug: string;
     client_name: string;
-    category: "IT_SOFTWARE" | "GATE_SECURITY" | "SUPPLIER_ELECTRICAL";
+    category: string;
     summary: string;
     challenge_solution_detail: string;
     thumbnail_url: string;
@@ -37,7 +47,7 @@ export default function CmsPortfoliosPage() {
     title: "",
     slug: "",
     client_name: "",
-    category: "GATE_SECURITY",
+    category: "SOFTWARE_SOLUTION",
     summary: "",
     challenge_solution_detail: "",
     thumbnail_url: "",
@@ -45,15 +55,21 @@ export default function CmsPortfoliosPage() {
     display_order: 1,
   });
 
-  const loadPortfolios = async () => {
+  const loadData = async () => {
     setLoading(true);
-    const data = await getAdminPortfolios();
-    setPortfolios(data);
+    const [pList, cList] = await Promise.all([
+      getAdminPortfolios(),
+      getAdminServiceCategories(),
+    ]);
+    setPortfolios(pList);
+    if (cList && cList.length > 0) {
+      setCategories(cList);
+    }
     setLoading(false);
   };
 
   useEffect(() => {
-    loadPortfolios();
+    loadData();
   }, []);
 
   const openAddDialog = () => {
@@ -62,7 +78,7 @@ export default function CmsPortfoliosPage() {
       title: "",
       slug: "",
       client_name: "",
-      category: "GATE_SECURITY",
+      category: categories[0]?.code || "SOFTWARE_SOLUTION",
       summary: "",
       challenge_solution_detail: "",
       thumbnail_url: "",
@@ -116,7 +132,7 @@ export default function CmsPortfoliosPage() {
     if (res.success) {
       toast.success(res.message);
       setIsDialogOpen(false);
-      loadPortfolios();
+      loadData();
     } else {
       toast.error(res.message);
     }
@@ -127,23 +143,24 @@ export default function CmsPortfoliosPage() {
     if (res.success) {
       toast.success(res.message);
       setDeleteConfirmId(null);
-      loadPortfolios();
+      loadData();
     } else {
       toast.error(res.message);
     }
   };
 
   const getCategoryBadge = (cat: string) => {
-    switch (cat) {
-      case "IT_SOFTWARE":
-        return <Badge className="bg-blue-500/10 text-blue-600 border border-blue-500/20">IT Software</Badge>;
-      case "GATE_SECURITY":
-        return <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20">Gate & Keamanan</Badge>;
-      case "SUPPLIER_ELECTRICAL":
-        return <Badge className="bg-purple-500/10 text-purple-600 border border-purple-500/20">Supplier Elektrikal</Badge>;
-      default:
-        return <Badge variant="outline">{cat}</Badge>;
+    const matched = categories.find((c) => c.code === cat || c.name.toLowerCase() === (cat || "").toLowerCase());
+    const label = matched ? matched.name : cat;
+    const upper = (cat || "").toUpperCase();
+
+    if (upper.includes("SOFTWARE") || upper.includes("IT")) {
+      return <Badge className="bg-blue-500/10 text-blue-600 border border-blue-500/20">{label || "Software Solution"}</Badge>;
     }
+    if (upper.includes("SECURITY") || upper.includes("GATE") || upper.includes("CCTV")) {
+      return <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20">{label || "Security System"}</Badge>;
+    }
+    return <Badge className="bg-purple-500/10 text-purple-600 border border-purple-500/20">{label || "System Integrator"}</Badge>;
   };
 
   return (
@@ -312,7 +329,7 @@ export default function CmsPortfoliosPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1.5 sm:col-span-2">
                     <Label htmlFor="category" className="text-xs font-bold text-slate-700 uppercase tracking-wide">
-                      Kategori Solusi
+                      Kategori Solusi (Master Data)
                     </Label>
                     <Select
                       value={form.category}
@@ -322,9 +339,11 @@ export default function CmsPortfoliosPage() {
                         <SelectValue placeholder="Pilih Kategori" />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl">
-                        <SelectItem value="GATE_SECURITY">Gate &amp; Keamanan Akses (Turnstile, Barrier, CCTV)</SelectItem>
-                        <SelectItem value="IT_SOFTWARE">IT Software &amp; Sistem Enterprise (Web, Mobile, AI)</SelectItem>
-                        <SelectItem value="SUPPLIER_ELECTRICAL">General Supplier &amp; Elektrikal (Mekanikal, K3, 6KV)</SelectItem>
+                        {categories.map((c) => (
+                          <SelectItem key={c.code} value={c.code}>
+                            {c.name} {c.description ? `(${c.description})` : ""}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>

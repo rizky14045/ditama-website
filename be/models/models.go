@@ -123,6 +123,20 @@ func (CertificationLegality) TableName() string {
 	return "certifications_legalities"
 }
 
+// ServiceCategory represents Master Data for solution categories used across Portfolios, Contact Inquiries, and Services
+type ServiceCategory struct {
+	BaseUUIDModel
+	Code         string `gorm:"size:60;not null;uniqueIndex" json:"code"` // SOFTWARE_SOLUTION, SECURITY_SYSTEM, SYSTEM_INTEGRATOR
+	Name         string `gorm:"size:120;not null" json:"name"`            // Software Solution, Security System, System Integrator
+	Description  string `gorm:"type:text" json:"description"`
+	DisplayOrder int    `gorm:"default:0" json:"display_order"`
+	IsActive     bool   `gorm:"default:true;not null" json:"is_active"`
+}
+
+func (ServiceCategory) TableName() string {
+	return "service_categories"
+}
+
 // Service represents the 4 core service pillars
 type Service struct {
 	BaseUUIDModel

@@ -58,7 +58,7 @@ export default function ComproPage() {
         <Services data={homeData?.services} />
 
         {/* 6. Portofolio & Studi Kasus */}
-        <Portfolio data={homeData?.portfolios} />
+        <Portfolio data={homeData?.portfolios} categories={homeData?.service_categories} />
 
         {/* 7. Partner Teknologi Resmi */}
         <TechPartners data={homeData?.tech_partners} />
@@ -71,7 +71,11 @@ export default function ComproPage() {
       <Footer data={homeData} />
 
       {/* 10. Contact Modal */}
-      <ContactModal isOpen={isContactModalOpen} onClose={closeContactModal} />
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={closeContactModal}
+        categories={homeData?.service_categories}
+      />
     </div>
   );
 }

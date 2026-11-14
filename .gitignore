@@ -1,2 +1,5 @@
 *.pdf
 *.md
+/manual_book_assets
+*.js
+*.html

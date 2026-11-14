@@ -66,6 +66,14 @@ func (h *Handler) GetHomeSections(c *gin.Context) {
 		data["services"] = services
 	}
 
+	// 5b. Service Categories Master Data (Software Solution, Security System, System Integrator)
+	var serviceCategories []models.ServiceCategory
+	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&serviceCategories).Error; err == nil && len(serviceCategories) > 0 {
+		data["service_categories"] = serviceCategories
+	} else {
+		data["service_categories"] = getDefaultServiceCategoriesList()
+	}
+
 	// 6. Portfolios
 	var portfolios []models.Portfolio
 	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&portfolios).Error; err == nil && len(portfolios) > 0 {
@@ -97,17 +105,59 @@ func (h *Handler) GetHomeSections(c *gin.Context) {
 	helper.JsonResponse(c, true, "Company profile data loaded successfully", data, nil, http.StatusOK)
 }
 
+func getDefaultServiceCategoriesList() []models.ServiceCategory {
+	return []models.ServiceCategory{
+		{
+			Code:         "SOFTWARE_SOLUTION",
+			Name:         "Software Solution",
+			Description:  "Pengembangan aplikasi web, mobile app, kecerdasan buatan (AI analytics), dan sistem enterprise ERP.",
+			DisplayOrder: 1,
+			IsActive:     true,
+		},
+		{
+			Code:         "SECURITY_SYSTEM",
+			Name:         "Security System",
+			Description:  "Sistem pengamanan gerbang fisik pintar (Turnstile Full Height, Barrier Gate), Access Control RFID, dan CCTV Surveillance terpadu.",
+			DisplayOrder: 2,
+			IsActive:     true,
+		},
+		{
+			Code:         "SYSTEM_INTEGRATOR",
+			Name:         "System Integrator",
+			Description:  "Integrasi sistem industri, otomasi SCADA, pengadaan peralatan keselamatan kerja (K3), serta suplai mekanikal elektrikal.",
+			DisplayOrder: 3,
+			IsActive:     true,
+		},
+	}
+}
+
 func getDefaultComproData() gin.H {
 	return gin.H{
-		"site_settings": settings.CurrentSiteSettings,
-		"hero":          sections.GetActiveHero(),
-		"about":         sections.GetActiveAbout(),
-		"services":      sections.GetActiveServices(),
-		"portfolios":    sections.GetActivePortfolios(),
-		"clients":       sections.GetActiveClients(),
-		"tech_partners": sections.GetActiveTechPartners(),
-		"cta_banner":    sections.GetActiveCta(),
+		"site_settings":      settings.CurrentSiteSettings,
+		"hero":               sections.GetActiveHero(),
+		"about":              sections.GetActiveAbout(),
+		"services":           sections.GetActiveServices(),
+		"service_categories": getDefaultServiceCategoriesList(),
+		"portfolios":         sections.GetActivePortfolios(),
+		"clients":            sections.GetActiveClients(),
+		"tech_partners":      sections.GetActiveTechPartners(),
+		"cta_banner":         sections.GetActiveCta(),
 	}
+}
+
+// GetServiceCategories returns active solution categories master data for public consumption
+func (h *Handler) GetServiceCategories(c *gin.Context) {
+	c.Header("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
+	if h.DB == nil {
+		helper.JsonResponse(c, true, "Service categories loaded", getDefaultServiceCategoriesList(), nil, http.StatusOK)
+		return
+	}
+	var categories []models.ServiceCategory
+	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&categories).Error; err != nil || len(categories) == 0 {
+		helper.JsonResponse(c, true, "Service categories loaded (default)", getDefaultServiceCategoriesList(), nil, http.StatusOK)
+		return
+	}
+	helper.JsonResponse(c, true, "Service categories loaded successfully", categories, nil, http.StatusOK)
 }
 
 // GetPortfolioDetail returns detail and SEO meta for a specific portfolio project
@@ -192,6 +242,7 @@ func SetupRoutes(rg *gin.RouterGroup, db *gorm.DB) {
 	pub := rg.Group("/public")
 	{
 		pub.GET("/home", h.GetHomeSections)
+		pub.GET("/service-categories", h.GetServiceCategories)
 		pub.GET("/portfolios/:slug", h.GetPortfolioDetail)
 		pub.POST("/inquiries", h.CreateInquiry)
 	}

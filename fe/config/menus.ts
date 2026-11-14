@@ -62,6 +62,11 @@ export const menusConfig: {
           icon: Application,
         },
         {
+          title: "Kategori Solusi (Master)",
+          href: "/cms/categories",
+          icon: Components,
+        },
+        {
           title: "Portofolio Proyek",
           href: "/cms/portfolios",
           icon: Graph,
@@ -135,6 +140,11 @@ export const menusConfig: {
             title: "Layanan & Solusi",
             href: "/cms/services",
             icon: Application,
+          },
+          {
+            title: "Kategori Solusi (Master)",
+            href: "/cms/categories",
+            icon: Components,
           },
           {
             title: "Portofolio Proyek",
@@ -225,6 +235,11 @@ export const menusConfig: {
         title: "Layanan & Solusi",
         icon: Application,
         href: "/cms/services",
+      },
+      {
+        title: "Kategori Solusi (Master)",
+        icon: Components,
+        href: "/cms/categories",
       },
       {
         title: "Portofolio Proyek",

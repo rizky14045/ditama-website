@@ -37,22 +37,27 @@ func Seed(db *gorm.DB) error {
 		return err
 	}
 
-	// 6. Seed Services (4 Pillars)
+	// 6. Seed Services Categories (Master Data 3 Solusi)
+	if err := seedServiceCategories(db); err != nil {
+		return err
+	}
+
+	// 7. Seed Services (4 Pillars)
 	if err := seedServices(db); err != nil {
 		return err
 	}
 
-	// 7. Seed Portfolios (6 Case Studies)
+	// 8. Seed Portfolios (6 Case Studies)
 	if err := seedPortfolios(db); err != nil {
 		return err
 	}
 
-	// 8. Seed Clients & Technology Partners
+	// 9. Seed Clients & Technology Partners
 	if err := seedClientsPartners(db); err != nil {
 		return err
 	}
 
-	// 9. Seed CTA Banner
+	// 10. Seed CTA Banner
 	if err := seedCtaBanner(db); err != nil {
 		return err
 	}
@@ -232,6 +237,51 @@ func seedCertificationsLegalities(db *gorm.DB) error {
 	return nil
 }
 
+func seedServiceCategories(db *gorm.DB) error {
+	categories := []models.ServiceCategory{
+		{
+			Code:         "SOFTWARE_SOLUTION",
+			Name:         "Software Solution",
+			Description:  "Pengembangan aplikasi web, mobile app, kecerdasan buatan (AI analytics), dan sistem enterprise ERP.",
+			DisplayOrder: 1,
+			IsActive:     true,
+		},
+		{
+			Code:         "SECURITY_SYSTEM",
+			Name:         "Security System",
+			Description:  "Sistem pengamanan gerbang fisik pintar (Turnstile Full Height, Barrier Gate), Access Control RFID, dan CCTV Surveillance terpadu.",
+			DisplayOrder: 2,
+			IsActive:     true,
+		},
+		{
+			Code:         "SYSTEM_INTEGRATOR",
+			Name:         "System Integrator",
+			Description:  "Integrasi sistem industri, otomasi SCADA, pengadaan peralatan keselamatan kerja (K3), serta suplai mekanikal elektrikal.",
+			DisplayOrder: 3,
+			IsActive:     true,
+		},
+	}
+
+	for _, c := range categories {
+		var existing models.ServiceCategory
+		if err := db.Where("code = ?", c.Code).First(&existing).Error; err != nil {
+			if err := db.Create(&c).Error; err != nil {
+				return err
+			}
+			log.Printf("  -> Service Category seeded: %s (%s)", c.Name, c.Code)
+		} else {
+			// Update name & description if already exists
+			db.Model(&existing).Updates(map[string]interface{}{
+				"name":          c.Name,
+				"description":   c.Description,
+				"display_order": c.DisplayOrder,
+				"is_active":     c.IsActive,
+			})
+		}
+	}
+	return nil
+}
+
 func seedServices(db *gorm.DB) error {
 	services := []models.Service{
 		{
@@ -290,7 +340,7 @@ func seedPortfolios(db *gorm.DB) error {
 			Title:                   "E-Preventive Maintenance & SIDAK AI",
 			Slug:                    "pln-np-sidak-ai",
 			ClientName:              "PT. PLN Nusantara Power",
-			Category:                "IT_SOFTWARE",
+			Category:                "SOFTWARE_SOLUTION",
 			Summary:                 "Aplikasi mobile dan website untuk eksekusi preventive maintenance PLTU serta Sistem Data Keamanan (SIDAK) seluruh unit dengan AI rekap data & pemetaan kerawanan.",
 			ChallengeSolutionDetail: "Integrasi data pemeliharaan unit pembangkit tenaga listrik dengan pemrosesan AI otomatis dan pemetaan risiko secara real-time.",
 			DisplayOrder:            1,
@@ -301,7 +351,7 @@ func seedPortfolios(db *gorm.DB) error {
 			Title:                   "Turnstile Full High & People Counting",
 			Slug:                    "semen-gresik-turnstile",
 			ClientName:              "PT. Semen Gresik Rembang Tbk.",
-			Category:                "GATE_SECURITY",
+			Category:                "SECURITY_SYSTEM",
 			Summary:                 "Pemasangan unit Turnstile Full High, sistem Access Control terpadu, serta integrasi sistem Vault dengan fitur Custom People Counting untuk akurasi data personel pabrik.",
 			ChallengeSolutionDetail: "Pengamanan perimeter fasilitas produksi semen dengan barrier turnstile fisik dan integrasi people counting otomatis.",
 			DisplayOrder:            2,
@@ -312,7 +362,7 @@ func seedPortfolios(db *gorm.DB) error {
 			Title:                   "Access Control & Radiation Protection",
 			Slug:                    "gleneagles-radiation-protection",
 			ClientName:              "Gleneagles KL & Likas Hospital",
-			Category:                "GATE_SECURITY",
+			Category:                "SECURITY_SYSTEM",
 			Summary:                 "Sistem integrasi dan instalasi Access Control, CCTV, serta sistem alarm proteksi radiasi fisik (Physical Protection Radiation) pada fasilitas medis internasional.",
 			ChallengeSolutionDetail: "Standar kepatuhan proteksi radiasi medis di fasilitas kesehatan Kuala Lumpur & Kota Kinabalu.",
 			DisplayOrder:            3,
@@ -323,7 +373,7 @@ func seedPortfolios(db *gorm.DB) error {
 			Title:                   "Barrier Gate & CCTV Maintenance",
 			Slug:                    "pln-muara-karang-barrier-gate",
 			ClientName:              "PT. PLN Nusantara Power UP Muara Karang",
-			Category:                "GATE_SECURITY",
+			Category:                "SECURITY_SYSTEM",
 			Summary:                 "Perbaikan, pemasangan Barrier Gate, integrasi Visitor Management System dengan OCR plat nomor, serta pemeliharaan berkala CCTV & Gate Management System.",
 			ChallengeSolutionDetail: "Kontrak multi-tahun (2025-2028) pemeliharaan sistem gerbang otomatis dan CCTV di pembangkit Muara Karang.",
 			DisplayOrder:            4,
@@ -334,7 +384,7 @@ func seedPortfolios(db *gorm.DB) error {
 			Title:                   "Instalasi Access Door Kantor Pusat",
 			Slug:                    "shopee-office-access-door",
 			ClientName:              "PT. Shopee Office",
-			Category:                "GATE_SECURITY",
+			Category:                "SECURITY_SYSTEM",
 			Summary:                 "Pemasangan dan konfigurasi sistem Access Door berstandar korporat untuk pengamanan akses ruang kerja di Sopo Del Tower Kuningan, Jakarta Selatan.",
 			ChallengeSolutionDetail: "Pengamanan akses ruang kerja eksekutif lantai 28 Sopo Del Tower Kuningan.",
 			DisplayOrder:            5,
@@ -345,7 +395,7 @@ func seedPortfolios(db *gorm.DB) error {
 			Title:                   "Fabrication Pondation & Pipe Rack 6KV",
 			Slug:                    "krakatau-posco-pipe-rack",
 			ClientName:              "PT. Krakatau Posco",
-			Category:                "SUPPLIER_ELECTRICAL",
+			Category:                "SYSTEM_INTEGRATOR",
 			Summary:                 "Pekerjaan fabrikasi pondasi, pemasangan struktur baja Pipe Rack 6KV, serta dukungan pengadaan mekanikal & elektrikal di kawasan industri Cilegon.",
 			ChallengeSolutionDetail: "Pekerjaan rekayasa struktur industri berat dan jalur kelistrikan 6KV.",
 			DisplayOrder:            6,

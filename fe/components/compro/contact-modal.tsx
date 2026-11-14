@@ -1,20 +1,49 @@
 "use client";
 
-import React, { useState } from "react";
-import { sendInquiry } from "@/lib/api-compro";
+import React, { useState, useEffect } from "react";
+import {
+  sendInquiry,
+  getPublicServiceCategories,
+  ServiceCategoryData,
+  DEFAULT_SERVICE_CATEGORIES,
+} from "@/lib/api-compro";
 
 interface ContactModalProps {
   isOpen: boolean;
   onClose: () => void;
+  categories?: ServiceCategoryData[];
 }
 
-export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
+export default function ContactModal({ isOpen, onClose, categories: initialCategories }: ContactModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [serviceTopic, setServiceTopic] = useState("IT Solution & Software Development");
+  const [categories, setCategories] = useState<ServiceCategoryData[]>(
+    initialCategories && initialCategories.length > 0 ? initialCategories : DEFAULT_SERVICE_CATEGORIES
+  );
+  const [serviceTopic, setServiceTopic] = useState(
+    categories[0]?.name || "Software Solution"
+  );
   const [projectDetail, setProjectDetail] = useState("");
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  useEffect(() => {
+    if (initialCategories && initialCategories.length > 0) {
+      setCategories(initialCategories);
+      if (!serviceTopic) {
+        setServiceTopic(initialCategories[0].name);
+      }
+    } else {
+      getPublicServiceCategories().then((res) => {
+        if (res && res.length > 0) {
+          setCategories(res);
+          if (!serviceTopic) {
+            setServiceTopic(res[0].name);
+          }
+        }
+      });
+    }
+  }, [initialCategories, isOpen]);
 
   if (!isOpen) return null;
 
@@ -165,10 +194,11 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 onChange={(e) => setServiceTopic(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:border-navy focus:ring-2 focus:ring-navy/20 disabled:bg-slate-100 transition-all font-medium text-slate-800 cursor-pointer"
               >
-                <option value="IT Solution & Software Development">IT Solution &amp; Software (Web, Mobile, AI)</option>
-                <option value="System Integration (SCADA/MAXIMO)">System Integration (SCADA, IoT, ERP)</option>
-                <option value="Gate & Security System (Turnstile/CCTV)">Gate &amp; Security (Barrier Gate, RFID, CCTV)</option>
-                <option value="General Supplier & Electrical">General Supplier &amp; Electrical (K3, 6KV)</option>
+                {categories.map((cat) => (
+                  <option key={cat.code} value={cat.name}>
+                    {cat.name} {cat.description ? `- ${cat.description}` : ""}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
