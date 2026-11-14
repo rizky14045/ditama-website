@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
@@ -23,6 +22,20 @@ import {
 } from "@/lib/api-compro";
 import { Icon } from "@iconify/react";
 import ImageUploadDropzone from "@/components/common/image-upload-dropzone";
+
+function normalizeCategoryCode(cat: string): string {
+  const upper = (cat || "").toUpperCase();
+  if (upper.includes("SOFTWARE") || upper.includes("IT") || upper.includes("APP")) {
+    return "SOFTWARE_SOLUTION";
+  }
+  if (upper.includes("SECURITY") || upper.includes("GATE") || upper.includes("CCTV") || upper.includes("ACCESS") || upper.includes("TURNSTILE")) {
+    return "SECURITY_SYSTEM";
+  }
+  if (upper.includes("INTEGRAT") || upper.includes("SUPPLIER") || upper.includes("ELECTRICAL") || upper.includes("SCADA")) {
+    return "SYSTEM_INTEGRATOR";
+  }
+  return "SOFTWARE_SOLUTION";
+}
 
 export default function CmsPortfoliosPage() {
   const [portfolios, setPortfolios] = useState<PortfolioData[]>([]);
@@ -94,7 +107,7 @@ export default function CmsPortfoliosPage() {
       title: item.title,
       slug: item.slug,
       client_name: item.client_name,
-      category: item.category,
+      category: normalizeCategoryCode(item.category),
       summary: item.summary,
       challenge_solution_detail: item.challenge_solution_detail || "",
       thumbnail_url: item.thumbnail_url || "",
@@ -112,7 +125,7 @@ export default function CmsPortfoliosPage() {
       title: form.title,
       slug: form.slug || form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
       client_name: form.client_name,
-      category: form.category,
+      category: normalizeCategoryCode(form.category),
       summary: form.summary,
       challenge_solution_detail: form.challenge_solution_detail,
       thumbnail_url: form.thumbnail_url,
@@ -329,23 +342,25 @@ export default function CmsPortfoliosPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1.5 sm:col-span-2">
                     <Label htmlFor="category" className="text-xs font-bold text-slate-700 uppercase tracking-wide">
-                      Kategori Solusi (Master Data)
+                      Kategori Solusi (Master Data) <span className="text-rose-500">*</span>
                     </Label>
-                    <Select
-                      value={form.category}
-                      onValueChange={(val: any) => setForm({ ...form, category: val })}
-                    >
-                      <SelectTrigger id="category" className="h-11 rounded-xl border-slate-200 bg-white font-medium">
-                        <SelectValue placeholder="Pilih Kategori" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl">
+                    <div className="relative">
+                      <select
+                        id="category"
+                        value={form.category}
+                        onChange={(e) => setForm({ ...form, category: e.target.value })}
+                        className="w-full h-11 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-medium text-sm text-slate-800 focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 appearance-none cursor-pointer pr-10 shadow-2xs"
+                      >
                         {categories.map((c) => (
-                          <SelectItem key={c.code} value={c.code}>
-                            {c.name} {c.description ? `(${c.description})` : ""}
-                          </SelectItem>
+                          <option key={c.code} value={c.code}>
+                            {c.name} {c.description ? `- ${c.description}` : ""}
+                          </option>
                         ))}
-                      </SelectContent>
-                    </Select>
+                      </select>
+                      <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                        <Icon icon="lucide:chevron-down" className="w-4 h-4" />
+                      </div>
+                    </div>
                   </div>
 
                   <div className="space-y-1.5">
