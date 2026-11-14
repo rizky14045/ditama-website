@@ -3,3 +3,5 @@
 /manual_book_assets
 *.js
 *.html
+
+/fe/.env.local

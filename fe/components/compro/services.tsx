@@ -137,13 +137,26 @@ export default function Services({ data }: ServicesProps) {
             Layanan Utama Kami
           </h2>
           <p className="text-slate-600 text-base mt-3">
-            Empat pilar keahlian profesional untuk mendukung transformasi digital,
-            efisiensi operasional, dan keamanan fasilitas industri Anda.
+            {serviceList.length === 3
+              ? "Pilar keahlian profesional untuk mendukung transformasi digital, efisiensi operasional, dan keamanan fasilitas industri Anda."
+              : serviceList.length === 4
+              ? "Pilar keahlian profesional untuk mendukung transformasi digital, efisiensi operasional, dan keamanan fasilitas industri Anda."
+              : "Pilar keahlian profesional untuk mendukung transformasi digital, efisiensi operasional, dan keamanan fasilitas industri Anda."}
           </p>
         </div>
 
-        {/* 4-Column Responsive Card Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Dynamic Responsive Card Grid (Centered for 1, 2, 3, or 4 items) */}
+        <div
+          className={`grid gap-6 sm:gap-8 justify-center ${
+            serviceList.length === 3
+              ? "grid-cols-1 md:grid-cols-3 max-w-6xl mx-auto"
+              : serviceList.length === 2
+              ? "grid-cols-1 md:grid-cols-2 max-w-3xl mx-auto"
+              : serviceList.length === 1
+              ? "grid-cols-1 max-w-md mx-auto"
+              : "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
+          }`}
+        >
           {serviceList.map((srv, idx) => (
             <article
               key={srv.id}
