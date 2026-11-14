@@ -1,0 +1,42 @@
+[
+  {
+    "id": "33333333-3333-3333-3333-333333333301",
+    "title": "IT Solution & Multimedia",
+    "slug": "it-solution-multimedia",
+    "short_description": "Pengembangan aplikasi kustom sesuai alur bisnis perusahaan dan produksi media visual interaktif.",
+    "bullet_features": "[\"Custom Software (Web & Mobile)\", \"AI & OCR Plat Nomor Kendaraan\", \"Visitor Management & People Counting\", \"Animasi 2D/3D Safety Induction\"]",
+    "icon_name": "heroicons:code-bracket",
+    "display_order": 1,
+    "is_active": true
+  },
+  {
+    "id": "33333333-3333-3333-3333-333333333302",
+    "title": "System Integration",
+    "slug": "system-integration",
+    "short_description": "Menghubungkan perangkat keras, sensor lapangan, dan basis data ke dalam satu dashboard terpusat.",
+    "bullet_features": "[\"Integrasi SCADA, MAXIMO & ELLIPSE\", \"Sinkronisasi Data Pembangkit\", \"Dashboard Pemantauan Lintas Unit\", \"Infrastruktur Jaringan & Server\"]",
+    "icon_name": "heroicons:server-stack",
+    "display_order": 2,
+    "is_active": true
+  },
+  {
+    "id": "33333333-3333-3333-3333-333333333303",
+    "title": "Gate & Security System",
+    "slug": "gate-security-system",
+    "short_description": "Sistem kontrol akses fisik dan keamanan area berisiko tinggi untuk pabrik, gedung, dan kawasan vital.",
+    "bullet_features": "[\"Barrier Gate & Gate Management System\", \"Turnstile Full High & Tripod\", \"Access Control Door & Alarm\", \"Instalasi & Maintenance CCTV\"]",
+    "icon_name": "heroicons:shield-check",
+    "display_order": 3,
+    "is_active": true
+  },
+  {
+    "id": "33333333-3333-3333-3333-333333333304",
+    "title": "General Supplier & Electrical",
+    "slug": "general-supplier-electrical",
+    "short_description": "Pengadaan suku cadang industri serta jasa pemeliharaan kelistrikan dan konstruksi penunjang.",
+    "bullet_features": "[\"Produk Mekanikal, Elektrikal & Instrumen\", \"Maintenance Lift & Motor Generator\", \"Rewinding Motor AC/DC (Low-High Volt)\", \"Fabrikasi & Instalasi Struktur 6KV\"]",
+    "icon_name": "heroicons:bolt",
+    "display_order": 4,
+    "is_active": true
+  }
+]

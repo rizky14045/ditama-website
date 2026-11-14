@@ -1,0 +1,28 @@
+[
+  {
+    "id": "55555555-5555-5555-5555-555555555501",
+    "created_at": "2026-11-14T08:30:00Z",
+    "updated_at": "2026-11-14T08:30:00Z",
+    "sender_name": "Agus Setiawan (PT. Krakatau Steel)",
+    "sender_email": "agus.setiawan@krakatausteel.com",
+    "service_topic": "Gate & Security System",
+    "project_detail": "Mohon penawaran pengadaan 4 unit Flap Barrier Gate dan integrasi sistem RFID UHF untuk gerbang masuk pabrik di Cilegon.",
+    "ip_address": "127.0.0.1",
+    "is_read": false,
+    "status": "NEW",
+    "admin_notes": ""
+  },
+  {
+    "id": "55555555-5555-5555-5555-555555555502",
+    "created_at": "2026-11-13T14:15:00Z",
+    "updated_at": "2026-11-13T15:20:00Z",
+    "sender_name": "Bambang Wibowo (PT. PLN Nusantara Power)",
+    "sender_email": "bambang.w@plnnp.co.id",
+    "service_topic": "IT Solution & Software Development",
+    "project_detail": "Permohonan perpanjangan kontrak pemeliharaan dan penambahan modul analitik AI pada sistem SIDAK.",
+    "ip_address": "127.0.0.1",
+    "is_read": true,
+    "status": "IN_DISCUSSION",
+    "admin_notes": "Proposal penawaran tahap 2 telah dikirim ke tim procurement."
+  }
+]
