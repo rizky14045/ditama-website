@@ -1145,25 +1145,28 @@ const serviceCategoriesFilePath = "data/service_categories.json"
 func getDefaultServiceCategories() []models.ServiceCategory {
 	cats := []models.ServiceCategory{
 		{
-			Code:         "SOFTWARE_SOLUTION",
-			Name:         "Software Solution",
-			Description:  "Pengembangan aplikasi web, mobile app, kecerdasan buatan (AI analytics), dan sistem enterprise ERP.",
-			DisplayOrder: 1,
-			IsActive:     true,
+			BaseUUIDModel: models.BaseUUIDModel{ID: uuid.MustParse("55555555-5555-5555-5555-555555555501")},
+			Code:          "SOFTWARE_SOLUTION",
+			Name:          "Software Solution",
+			Description:   "Pengembangan aplikasi web, mobile app, kecerdasan buatan (AI analytics), dan sistem enterprise ERP.",
+			DisplayOrder:  1,
+			IsActive:      true,
 		},
 		{
-			Code:         "SECURITY_SYSTEM",
-			Name:         "Security System",
-			Description:  "Sistem pengamanan gerbang fisik pintar (Turnstile Full Height, Barrier Gate), Access Control RFID, dan CCTV Surveillance terpadu.",
-			DisplayOrder: 2,
-			IsActive:     true,
+			BaseUUIDModel: models.BaseUUIDModel{ID: uuid.MustParse("55555555-5555-5555-5555-555555555502")},
+			Code:          "SECURITY_SYSTEM",
+			Name:          "Security System",
+			Description:   "Sistem pengamanan gerbang fisik pintar (Turnstile Full Height, Barrier Gate), Access Control RFID, dan CCTV Surveillance terpadu.",
+			DisplayOrder:  2,
+			IsActive:      true,
 		},
 		{
-			Code:         "SYSTEM_INTEGRATOR",
-			Name:         "System Integrator",
-			Description:  "Integrasi sistem industri, otomasi SCADA, pengadaan peralatan keselamatan kerja (K3), serta suplai mekanikal elektrikal.",
-			DisplayOrder: 3,
-			IsActive:     true,
+			BaseUUIDModel: models.BaseUUIDModel{ID: uuid.MustParse("55555555-5555-5555-5555-555555555503")},
+			Code:          "SYSTEM_INTEGRATOR",
+			Name:          "System Integrator",
+			Description:   "Integrasi sistem industri, otomasi SCADA, pengadaan peralatan keselamatan kerja (K3), serta suplai mekanikal elektrikal.",
+			DisplayOrder:  3,
+			IsActive:      true,
 		},
 	}
 	if content, err := os.ReadFile(serviceCategoriesFilePath); err == nil {
@@ -1193,7 +1196,17 @@ func (h *Handler) ListServiceCategories(c *gin.Context) {
 		return
 	}
 	if len(cats) == 0 {
-		cats = getDefaultServiceCategories()
+		defaults := getDefaultServiceCategories()
+		for _, d := range defaults {
+			var chk models.ServiceCategory
+			if err := h.DB.Where("code = ?", d.Code).First(&chk).Error; err != nil {
+				_ = h.DB.Create(&d)
+			}
+		}
+		_ = h.DB.Where("deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&cats)
+		if len(cats) == 0 {
+			cats = defaults
+		}
 	}
 	helper.JsonResponse(c, true, "Service categories fetched", cats, nil, http.StatusOK)
 }
@@ -1247,11 +1260,7 @@ func (h *Handler) CreateServiceCategory(c *gin.Context) {
 
 func (h *Handler) UpdateServiceCategory(c *gin.Context) {
 	idParam := c.Param("id")
-	targetID, err := uuid.Parse(idParam)
-	if err != nil {
-		helper.JsonResponse(c, false, "Invalid UUID parameter", nil, err.Error(), http.StatusBadRequest)
-		return
-	}
+	targetID, _ := uuid.Parse(idParam)
 
 	var req struct {
 		Code         string `json:"code"`
@@ -1265,18 +1274,69 @@ func (h *Handler) UpdateServiceCategory(c *gin.Context) {
 		return
 	}
 
+	code := strings.TrimSpace(req.Code)
+	name := strings.TrimSpace(req.Name)
+	if code == "" && name != "" {
+		code = strings.ToUpper(strings.ReplaceAll(name, " ", "_"))
+	}
+
 	if h.DB != nil {
 		var existing models.ServiceCategory
-		if err := h.DB.First(&existing, "id = ? AND deleted_at IS NULL", targetID).Error; err != nil {
-			helper.JsonResponse(c, false, "Service category not found", nil, err.Error(), http.StatusNotFound)
+		found := false
+
+		// 1. Coba cari berdasarkan UUID jika valid dan bukan uuid.Nil
+		if targetID != uuid.Nil {
+			if err := h.DB.First(&existing, "id = ? AND deleted_at IS NULL", targetID).Error; err == nil {
+				found = true
+			}
+		}
+
+		// 2. Jika tidak ditemukan lewat ID, cari berdasarkan Code
+		if !found && code != "" {
+			if err := h.DB.First(&existing, "code = ? AND deleted_at IS NULL", code).Error; err == nil {
+				found = true
+			}
+		}
+
+		// 3. Jika masih tidak ditemukan, cari berdasarkan Name
+		if !found && name != "" {
+			if err := h.DB.First(&existing, "name ILIKE ? AND deleted_at IS NULL", name).Error; err == nil {
+				found = true
+			}
+		}
+
+		// 4. Jika record belum ada sama sekali di DB, auto-create!
+		if !found {
+			newCat := models.ServiceCategory{
+				BaseUUIDModel: models.BaseUUIDModel{ID: uuid.New()},
+				Code:          code,
+				Name:          name,
+				Description:   strings.TrimSpace(req.Description),
+				DisplayOrder:  req.DisplayOrder,
+				IsActive:      true,
+			}
+			if req.IsActive != nil {
+				newCat.IsActive = *req.IsActive
+			}
+			if newCat.Name == "" {
+				newCat.Name = newCat.Code
+			}
+			if err := h.DB.Create(&newCat).Error; err != nil {
+				helper.JsonResponse(c, false, "Failed to create category", nil, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			auditlog.LogEvent(h.DB, c, "CREATE", "service_categories", newCat.ID.String(), nil, newCat)
+			helper.JsonResponse(c, true, "Service category created successfully", newCat, nil, http.StatusOK)
 			return
 		}
+
+		// Update existing
 		before := existing
-		if req.Name != "" {
-			existing.Name = strings.TrimSpace(req.Name)
+		if name != "" {
+			existing.Name = name
 		}
-		if req.Code != "" {
-			existing.Code = strings.TrimSpace(req.Code)
+		if code != "" {
+			existing.Code = code
 		}
 		existing.Description = strings.TrimSpace(req.Description)
 		existing.DisplayOrder = req.DisplayOrder
@@ -1293,28 +1353,82 @@ func (h *Handler) UpdateServiceCategory(c *gin.Context) {
 		helper.JsonResponse(c, true, "Service category updated successfully", existing, nil, http.StatusOK)
 		return
 	}
-	helper.JsonResponse(c, true, "Category updated (in-memory)", req, nil, http.StatusOK)
+
+	// Fallback file storage
+	cats := getDefaultServiceCategories()
+	found := false
+	for i, cat := range cats {
+		if (targetID != uuid.Nil && cat.ID == targetID) || (code != "" && cat.Code == code) {
+			if name != "" {
+				cats[i].Name = name
+			}
+			if code != "" {
+				cats[i].Code = code
+			}
+			cats[i].Description = strings.TrimSpace(req.Description)
+			cats[i].DisplayOrder = req.DisplayOrder
+			if req.IsActive != nil {
+				cats[i].IsActive = *req.IsActive
+			}
+			found = true
+			req.Code = cats[i].Code
+			req.Name = cats[i].Name
+			break
+		}
+	}
+	if !found {
+		newCat := models.ServiceCategory{
+			BaseUUIDModel: models.BaseUUIDModel{ID: uuid.New()},
+			Code:          code,
+			Name:          name,
+			Description:   strings.TrimSpace(req.Description),
+			DisplayOrder:  req.DisplayOrder,
+			IsActive:      true,
+		}
+		if req.IsActive != nil {
+			newCat.IsActive = *req.IsActive
+		}
+		cats = append(cats, newCat)
+	}
+	saveServiceCategoriesToFile(cats)
+	helper.JsonResponse(c, true, "Category updated successfully", req, nil, http.StatusOK)
 }
 
 func (h *Handler) DeleteServiceCategory(c *gin.Context) {
 	idParam := c.Param("id")
-	targetID, err := uuid.Parse(idParam)
-	if err != nil {
-		helper.JsonResponse(c, false, "Invalid UUID", nil, err.Error(), http.StatusBadRequest)
-		return
-	}
+	targetID, _ := uuid.Parse(idParam)
+	codeParam := c.Query("code")
 
 	if h.DB != nil {
 		var existing models.ServiceCategory
-		if err := h.DB.First(&existing, "id = ? AND deleted_at IS NULL", targetID).Error; err != nil {
-			helper.JsonResponse(c, false, "Service category not found", nil, err.Error(), http.StatusNotFound)
-			return
+		found := false
+		if targetID != uuid.Nil {
+			if err := h.DB.First(&existing, "id = ? AND deleted_at IS NULL", targetID).Error; err == nil {
+				found = true
+			}
 		}
-		existing.DeletedBy = getUserUUID(c)
-		_ = h.DB.Save(&existing)
-		_ = h.DB.Delete(&existing)
-		auditlog.LogEvent(h.DB, c, "DELETE", "service_categories", existing.ID.String(), existing, nil)
+		if !found && codeParam != "" {
+			if err := h.DB.First(&existing, "code = ? AND deleted_at IS NULL", codeParam).Error; err == nil {
+				found = true
+			}
+		}
+		if found {
+			existing.DeletedBy = getUserUUID(c)
+			_ = h.DB.Save(&existing)
+			_ = h.DB.Delete(&existing)
+			auditlog.LogEvent(h.DB, c, "DELETE", "service_categories", existing.ID.String(), existing, nil)
+		}
 	}
+
+	cats := getDefaultServiceCategories()
+	var updated []models.ServiceCategory
+	for _, cat := range cats {
+		if (targetID != uuid.Nil && cat.ID == targetID) || (codeParam != "" && cat.Code == codeParam) {
+			continue
+		}
+		updated = append(updated, cat)
+	}
+	saveServiceCategoriesToFile(updated)
 	helper.JsonResponse(c, true, "Service category deleted successfully", nil, nil, http.StatusOK)
 }
 

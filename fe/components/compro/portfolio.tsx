@@ -99,14 +99,35 @@ const DEFAULT_PORTFOLIO_ITEMS: DisplayPortfolioItem[] = [
 ];
 
 function normalizeCategory(cat: string): { key: "software" | "security" | "integrator"; label: string; gradient: string } {
-  const upper = (cat || "").toUpperCase();
-  if (upper.includes("SOFTWARE") || upper.includes("IT") || upper.includes("APP")) {
-    return { key: "software", label: "Software Solution", gradient: "from-navy to-navy-light" };
-  }
-  if (upper.includes("SECURITY") || upper.includes("GATE") || upper.includes("CCTV") || upper.includes("ACCESS") || upper.includes("TURNSTILE")) {
+  const upper = (cat || "").trim().toUpperCase();
+
+  // 1. Cek Security System terlebih dahulu (hindari substring "IT" cocok dengan "SECUR-IT-Y")
+  if (
+    upper === "SECURITY" ||
+    upper === "SECURITY_SYSTEM" ||
+    upper.includes("SECURITY") ||
+    upper.includes("GATE") ||
+    upper.includes("CCTV") ||
+    upper.includes("ACCESS") ||
+    upper.includes("TURNSTILE")
+  ) {
     return { key: "security", label: "Security System", gradient: "from-slate-800 to-navy" };
   }
-  return { key: "integrator", label: "System Integrator", gradient: "from-slate-800 to-navy-dark" };
+
+  // 2. Cek System Integrator
+  if (
+    upper === "INTEGRATOR" ||
+    upper === "SYSTEM_INTEGRATOR" ||
+    upper.includes("INTEGRAT") ||
+    upper.includes("SUPPLIER") ||
+    upper.includes("ELECTRICAL") ||
+    upper.includes("SCADA")
+  ) {
+    return { key: "integrator", label: "System Integrator", gradient: "from-slate-800 to-navy-dark" };
+  }
+
+  // 3. Default / Software Solution
+  return { key: "software", label: "Software Solution", gradient: "from-navy to-navy-light" };
 }
 
 export default function Portfolio({ data, categories }: PortfolioProps) {

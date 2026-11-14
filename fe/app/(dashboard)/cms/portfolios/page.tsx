@@ -24,16 +24,48 @@ import { Icon } from "@iconify/react";
 import ImageUploadDropzone from "@/components/common/image-upload-dropzone";
 
 function normalizeCategoryCode(cat: string): string {
-  const upper = (cat || "").toUpperCase();
-  if (upper.includes("SOFTWARE") || upper.includes("IT") || upper.includes("APP")) {
-    return "SOFTWARE_SOLUTION";
-  }
-  if (upper.includes("SECURITY") || upper.includes("GATE") || upper.includes("CCTV") || upper.includes("ACCESS") || upper.includes("TURNSTILE")) {
+  const upper = (cat || "").trim().toUpperCase();
+
+  // 1. Cek Security System terlebih dahulu (hindari substring "IT" cocok dengan "SECUR-IT-Y")
+  if (
+    upper === "SECURITY_SYSTEM" ||
+    upper.includes("SECURITY") ||
+    upper.includes("GATE") ||
+    upper.includes("CCTV") ||
+    upper.includes("ACCESS") ||
+    upper.includes("TURNSTILE")
+  ) {
     return "SECURITY_SYSTEM";
   }
-  if (upper.includes("INTEGRAT") || upper.includes("SUPPLIER") || upper.includes("ELECTRICAL") || upper.includes("SCADA")) {
+
+  // 2. Cek System Integrator
+  if (
+    upper === "SYSTEM_INTEGRATOR" ||
+    upper.includes("INTEGRAT") ||
+    upper.includes("SUPPLIER") ||
+    upper.includes("ELECTRICAL") ||
+    upper.includes("SCADA")
+  ) {
     return "SYSTEM_INTEGRATOR";
   }
+
+  // 3. Cek Software Solution (pastikan "IT" hanya sebagai kata tersendiri atau IT_SOFTWARE)
+  if (
+    upper === "SOFTWARE_SOLUTION" ||
+    upper.includes("SOFTWARE") ||
+    upper.includes("IT_SOFTWARE") ||
+    upper.includes("DEVELOPMENT") ||
+    upper.includes("APLIKASI") ||
+    upper.includes("WEB") ||
+    upper.includes("MOBILE") ||
+    upper.startsWith("IT ") ||
+    upper.endsWith(" IT") ||
+    upper.includes(" IT ") ||
+    upper === "IT"
+  ) {
+    return "SOFTWARE_SOLUTION";
+  }
+
   return "SOFTWARE_SOLUTION";
 }
 
@@ -165,15 +197,15 @@ export default function CmsPortfoliosPage() {
   const getCategoryBadge = (cat: string) => {
     const matched = categories.find((c) => c.code === cat || c.name.toLowerCase() === (cat || "").toLowerCase());
     const label = matched ? matched.name : cat;
-    const upper = (cat || "").toUpperCase();
+    const norm = normalizeCategoryCode(cat);
 
-    if (upper.includes("SOFTWARE") || upper.includes("IT")) {
-      return <Badge className="bg-blue-500/10 text-blue-600 border border-blue-500/20">{label || "Software Solution"}</Badge>;
-    }
-    if (upper.includes("SECURITY") || upper.includes("GATE") || upper.includes("CCTV")) {
+    if (norm === "SECURITY_SYSTEM") {
       return <Badge className="bg-amber-500/10 text-amber-600 border border-amber-500/20">{label || "Security System"}</Badge>;
     }
-    return <Badge className="bg-purple-500/10 text-purple-600 border border-purple-500/20">{label || "System Integrator"}</Badge>;
+    if (norm === "SYSTEM_INTEGRATOR") {
+      return <Badge className="bg-purple-500/10 text-purple-600 border border-purple-500/20">{label || "System Integrator"}</Badge>;
+    }
+    return <Badge className="bg-blue-500/10 text-blue-600 border border-blue-500/20">{label || "Software Solution"}</Badge>;
   };
 
   return (

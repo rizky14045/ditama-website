@@ -4,6 +4,7 @@ import (
 	"log"
 	"template/models"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -240,25 +241,28 @@ func seedCertificationsLegalities(db *gorm.DB) error {
 func seedServiceCategories(db *gorm.DB) error {
 	categories := []models.ServiceCategory{
 		{
-			Code:         "SOFTWARE_SOLUTION",
-			Name:         "Software Solution",
-			Description:  "Pengembangan aplikasi web, mobile app, kecerdasan buatan (AI analytics), dan sistem enterprise ERP.",
-			DisplayOrder: 1,
-			IsActive:     true,
+			BaseUUIDModel: models.BaseUUIDModel{ID: uuid.MustParse("55555555-5555-5555-5555-555555555501")},
+			Code:          "SOFTWARE_SOLUTION",
+			Name:          "Software Solution",
+			Description:   "Pengembangan aplikasi web, mobile app, kecerdasan buatan (AI analytics), dan sistem enterprise ERP.",
+			DisplayOrder:  1,
+			IsActive:      true,
 		},
 		{
-			Code:         "SECURITY_SYSTEM",
-			Name:         "Security System",
-			Description:  "Sistem pengamanan gerbang fisik pintar (Turnstile Full Height, Barrier Gate), Access Control RFID, dan CCTV Surveillance terpadu.",
-			DisplayOrder: 2,
-			IsActive:     true,
+			BaseUUIDModel: models.BaseUUIDModel{ID: uuid.MustParse("55555555-5555-5555-5555-555555555502")},
+			Code:          "SECURITY_SYSTEM",
+			Name:          "Security System",
+			Description:   "Sistem pengamanan gerbang fisik pintar (Turnstile Full Height, Barrier Gate), Access Control RFID, dan CCTV Surveillance terpadu.",
+			DisplayOrder:  2,
+			IsActive:      true,
 		},
 		{
-			Code:         "SYSTEM_INTEGRATOR",
-			Name:         "System Integrator",
-			Description:  "Integrasi sistem industri, otomasi SCADA, pengadaan peralatan keselamatan kerja (K3), serta suplai mekanikal elektrikal.",
-			DisplayOrder: 3,
-			IsActive:     true,
+			BaseUUIDModel: models.BaseUUIDModel{ID: uuid.MustParse("55555555-5555-5555-5555-555555555503")},
+			Code:          "SYSTEM_INTEGRATOR",
+			Name:          "System Integrator",
+			Description:   "Integrasi sistem industri, otomasi SCADA, pengadaan peralatan keselamatan kerja (K3), serta suplai mekanikal elektrikal.",
+			DisplayOrder:  3,
+			IsActive:      true,
 		},
 	}
 

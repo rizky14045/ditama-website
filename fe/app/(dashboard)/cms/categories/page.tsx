@@ -97,8 +97,11 @@ export default function CmsCategoriesPage() {
     };
 
     let res;
-    if (editingItem) {
+    if (editingItem && editingItem.id && editingItem.id !== "00000000-0000-0000-0000-000000000000") {
       res = await updateAdminServiceCategory(editingItem.id, payload);
+      if (!res.success && (res.message?.toLowerCase().includes("not found") || res.message?.toLowerCase().includes("gagal"))) {
+        res = await createAdminServiceCategory(payload);
+      }
     } else {
       res = await createAdminServiceCategory(payload);
     }

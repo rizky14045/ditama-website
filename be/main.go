@@ -45,6 +45,13 @@ func main() {
 			&models.Inquiry{},
 			&models.AuditLog{},
 		)
+
+		// Auto-initialize default service categories if table is empty
+		var countCats int64
+		if err := db.Model(&models.ServiceCategory{}).Where("deleted_at IS NULL").Count(&countCats).Error; err == nil && countCats == 0 {
+			log.Println("Initializing default Service Categories master data...")
+			_ = seeder.Seed(db)
+		}
 	}
 
 	// CLI argument for running database seeder
