@@ -40,8 +40,8 @@ const LogInForm = ({ logoUrl, companyName = "PT. DITAMA INTI TEKNOLOGI" }: LogIn
     resolver: zodResolver(schema),
     mode: "all",
     defaultValues: {
-      email: "admin@ditama.co.id",
-      password: "AdminDitama2025!",
+      email: "",
+      password: "",
     },
   });
 
@@ -129,7 +129,7 @@ const LogInForm = ({ logoUrl, companyName = "PT. DITAMA INTI TEKNOLOGI" }: LogIn
               {...register("email")}
               type="email"
               id="email"
-              placeholder="admin@ditama.co.id"
+              placeholder=""
               className={cn("h-12 rounded-xl bg-white border-slate-200 pl-10 font-medium text-slate-900 focus:border-navy", {
                 "border-destructive": errors.email,
               })}
@@ -155,7 +155,7 @@ const LogInForm = ({ logoUrl, companyName = "PT. DITAMA INTI TEKNOLOGI" }: LogIn
               {...register("password")}
               type={passwordType}
               id="password"
-              placeholder="••••••••••••"
+              placeholder=""
               className={cn("h-12 rounded-xl bg-white border-slate-200 pl-10 pr-11 font-medium text-slate-900 focus:border-navy", {
                 "border-destructive": errors.password,
               })}
