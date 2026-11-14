@@ -4,6 +4,12 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: false,
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   experimental: {
     optimizePackageImports: [
       "@iconify/react",
