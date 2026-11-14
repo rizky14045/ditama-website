@@ -163,6 +163,8 @@ export default function CmsPortfoliosPage() {
       thumbnail_url: form.thumbnail_url,
       project_year: Number(form.project_year),
       display_order: Number(form.display_order),
+      is_active: true,
+      is_featured: true,
     };
 
     let res;

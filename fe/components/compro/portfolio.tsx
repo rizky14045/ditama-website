@@ -133,31 +133,47 @@ function normalizeCategory(cat: string): { key: "software" | "security" | "integ
 export default function Portfolio({ data, categories }: PortfolioProps) {
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>("all");
 
-  const activeCategories = categories && categories.length > 0 ? categories : DEFAULT_SERVICE_CATEGORIES;
+  const displayList: DisplayPortfolioItem[] = (() => {
+    if (!data || data.length === 0) {
+      return DEFAULT_PORTFOLIO_ITEMS;
+    }
+    const mapped = data.map((item, idx) => {
+      const catInfo = normalizeCategory(item.category);
+      return {
+        id: item.id || `pf-${idx}`,
+        category: catInfo.key,
+        categoryLabel: catInfo.label,
+        client: item.client_name || "Klien Terpercaya",
+        title: item.title,
+        description: item.summary || item.challenge_solution_detail || "",
+        thumbnailUrl: item.thumbnail_url,
+        gradientClass: catInfo.gradient,
+        highlightText: item.project_year ? `Tahun ${item.project_year}` : undefined,
+        badgeLabel: catInfo.label,
+      };
+    });
 
-  const displayList: DisplayPortfolioItem[] =
-    data && data.length > 0
-      ? data.map((item, idx) => {
-          const catInfo = normalizeCategory(item.category);
-          return {
-            id: item.id || `pf-${idx}`,
-            category: catInfo.key,
-            categoryLabel: catInfo.label,
-            client: item.client_name || "Klien Terpercaya",
-            title: item.title,
-            description: item.summary || item.challenge_solution_detail || "",
-            thumbnailUrl: item.thumbnail_url,
-            gradientClass: catInfo.gradient,
-            highlightText: item.project_year ? `Tahun ${item.project_year}` : undefined,
-            badgeLabel: catInfo.label,
-          };
-        })
-      : DEFAULT_PORTFOLIO_ITEMS;
+    // Pastikan jika database backend belum memiliki portofolio Software Solution, tampilkan item unggulan default
+    const hasSoftware = mapped.some((item) => item.category === "software");
+    if (!hasSoftware) {
+      const defaultSoftware = DEFAULT_PORTFOLIO_ITEMS.filter((item) => item.category === "software");
+      return [...defaultSoftware, ...mapped];
+    }
+    return mapped;
+  })();
 
   const filteredItems = displayList.filter((item) => {
     if (activeFilter === "all") return true;
     return item.category === activeFilter;
   });
+
+  // Tab filter stabil untuk 3 kategori solusi utama
+  const filterTabs = [
+    { key: "all", label: "Semua" },
+    { key: "software", label: "Software Solution" },
+    { key: "security", label: "Security System" },
+    { key: "integrator", label: "System Integrator" },
+  ];
 
   return (
     <section id="portofolio" className="py-16 lg:py-24 bg-white">
@@ -178,32 +194,20 @@ export default function Portfolio({ data, categories }: PortfolioProps) {
             role="tablist"
             aria-label="Filter Kategori Portofolio"
           >
-            <button
-              type="button"
-              onClick={() => setActiveFilter("all")}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-heading transition-all cursor-pointer ${
-                activeFilter === "all"
-                  ? "bg-amberbrand text-navy-dark font-bold shadow-xs"
-                  : "bg-icegray text-slate-700 font-semibold hover:bg-slate-200"
-              }`}
-            >
-              Semua
-            </button>
-            {activeCategories.map((cat) => {
-              const catKey = normalizeCategory(cat.code || cat.name).key;
-              const isActive = activeFilter === catKey;
+            {filterTabs.map((tab) => {
+              const isActive = activeFilter === tab.key;
               return (
                 <button
-                  key={cat.id || cat.code}
+                  key={tab.key}
                   type="button"
-                  onClick={() => setActiveFilter(catKey)}
+                  onClick={() => setActiveFilter(tab.key)}
                   className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-heading transition-all cursor-pointer ${
                     isActive
                       ? "bg-amberbrand text-navy-dark font-bold shadow-xs"
                       : "bg-icegray text-slate-700 font-semibold hover:bg-slate-200"
                   }`}
                 >
-                  {cat.name}
+                  {tab.label}
                 </button>
               );
             })}
@@ -211,58 +215,73 @@ export default function Portfolio({ data, categories }: PortfolioProps) {
         </div>
 
         {/* Case Study Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
-          {filteredItems.map((item) => (
-            <article
-              key={item.id}
-              className="group bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-lg transition-all flex flex-col"
+        {filteredItems.length === 0 ? (
+          <div className="text-center py-16 bg-slate-50 rounded-3xl border border-dashed border-slate-200 p-8">
+            <p className="text-slate-600 font-medium text-sm">
+              Belum ada proyek yang ditampilkan pada kategori ini.
+            </p>
+            <button
+              type="button"
+              onClick={() => setActiveFilter("all")}
+              className="mt-4 px-5 py-2.5 rounded-xl bg-navy text-white text-xs font-bold hover:bg-navy-dark transition-colors cursor-pointer"
             >
-              <div
-                className={`h-48 bg-gradient-to-br ${item.gradientClass} p-5 flex flex-col justify-between relative overflow-hidden`}
-                style={
-                  item.thumbnailUrl
-                    ? {
-                        backgroundImage: `linear-gradient(rgba(10, 25, 47, 0.65), rgba(10, 25, 47, 0.85)), url(${item.thumbnailUrl})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                      }
-                    : undefined
-                }
+              Lihat Semua Portofolio
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+            {filteredItems.map((item) => (
+              <article
+                key={item.id}
+                className="group bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-lg transition-all flex flex-col"
               >
-                <span className="self-start px-3 py-1 rounded-lg bg-amberbrand text-navy-dark text-[11px] font-bold uppercase tracking-wide z-10">
-                  {item.categoryLabel}
-                </span>
+                <div
+                  className={`h-48 bg-gradient-to-br ${item.gradientClass} p-5 flex flex-col justify-between relative overflow-hidden`}
+                  style={
+                    item.thumbnailUrl
+                      ? {
+                          backgroundImage: `linear-gradient(rgba(10, 25, 47, 0.65), rgba(10, 25, 47, 0.85)), url(${item.thumbnailUrl})`,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                        }
+                      : undefined
+                  }
+                >
+                  <span className="self-start px-3 py-1 rounded-lg bg-amberbrand text-navy-dark text-[11px] font-bold uppercase tracking-wide z-10">
+                    {item.categoryLabel}
+                  </span>
 
-                <div className="bg-white/10 backdrop-blur-xs border border-white/20 rounded-xl p-3 text-white flex items-center justify-between gap-3 z-10">
+                  <div className="bg-white/10 backdrop-blur-xs border border-white/20 rounded-xl p-3 text-white flex items-center justify-between gap-3 z-10">
+                    <div>
+                      <p className="text-xs font-bold">{item.client}</p>
+                      {item.highlightText && (
+                        <p className="text-[11px] text-amberbrand font-medium">{item.highlightText}</p>
+                      )}
+                    </div>
+                    <div className="w-8 h-8 rounded-lg bg-amberbrand/20 text-amberbrand flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 flex-1 flex flex-col justify-between">
                   <div>
-                    <p className="text-xs font-bold">{item.client}</p>
-                    {item.highlightText && (
-                      <p className="text-[11px] text-amberbrand font-medium">{item.highlightText}</p>
-                    )}
-                  </div>
-                  <div className="w-8 h-8 rounded-lg bg-amberbrand/20 text-amberbrand flex items-center justify-center shrink-0">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
+                    <p className="text-xs font-bold text-amber-600 uppercase tracking-wide">
+                      {item.client}
+                    </p>
+                    <h3 className="font-heading font-bold text-lg text-navy mt-1 group-hover:text-navy-light transition-colors line-clamp-2">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-slate-600 mt-2.5 leading-relaxed line-clamp-3">
+                      {item.description}
+                    </p>
                   </div>
                 </div>
-              </div>
-              <div className="p-6 flex-1 flex flex-col justify-between">
-                <div>
-                  <p className="text-xs font-bold text-amber-600 uppercase tracking-wide">
-                    {item.client}
-                  </p>
-                  <h3 className="font-heading font-bold text-lg text-navy mt-1 group-hover:text-navy-light transition-colors line-clamp-2">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-slate-600 mt-2.5 leading-relaxed line-clamp-3">
-                    {item.description}
-                  </p>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

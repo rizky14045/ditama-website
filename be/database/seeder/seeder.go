@@ -415,6 +415,19 @@ func seedPortfolios(db *gorm.DB) error {
 				return err
 			}
 			log.Printf("  -> Portfolio seeded: %s", p.Title)
+		} else {
+			// Update kategori, title, client_name jika sudah ada
+			db.Model(&existing).Updates(map[string]interface{}{
+				"title":                     p.Title,
+				"client_name":              p.ClientName,
+				"category":                 p.Category,
+				"summary":                  p.Summary,
+				"challenge_solution_detail": p.ChallengeSolutionDetail,
+				"display_order":            p.DisplayOrder,
+				"is_featured":              p.IsFeatured,
+				"is_active":                p.IsActive,
+			})
+			log.Printf("  -> Portfolio updated: %s (%s)", p.Title, p.Category)
 		}
 	}
 	return nil

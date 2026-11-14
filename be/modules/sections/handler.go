@@ -592,6 +592,8 @@ func (h *Handler) CreatePortfolio(c *gin.Context) {
 		return
 	}
 
+	item.IsActive = true
+	item.IsFeatured = true
 	item.CreatedBy = getUserUUID(c)
 	if err := h.DB.Create(&item).Error; err != nil {
 		helper.JsonResponse(c, false, "Failed to create portfolio", nil, err.Error(), http.StatusInternalServerError)
@@ -628,9 +630,9 @@ func (h *Handler) UpdatePortfolio(c *gin.Context) {
 				items[i].SeoMetaTitle = req.SeoMetaTitle
 				items[i].SeoMetaDescription = req.SeoMetaDescription
 				items[i].SeoOgImageURL = req.SeoOgImageURL
-				items[i].IsFeatured = req.IsFeatured
+				items[i].IsFeatured = true
 				items[i].DisplayOrder = req.DisplayOrder
-				items[i].IsActive = req.IsActive
+				items[i].IsActive = true
 				items[i].UpdatedAt = time.Now()
 				found = true
 				req = items[i]
@@ -664,9 +666,10 @@ func (h *Handler) UpdatePortfolio(c *gin.Context) {
 	existing.SeoMetaTitle = req.SeoMetaTitle
 	existing.SeoMetaDescription = req.SeoMetaDescription
 	existing.SeoOgImageURL = req.SeoOgImageURL
-	existing.IsFeatured = req.IsFeatured
+	existing.IsFeatured = true
 	existing.DisplayOrder = req.DisplayOrder
-	existing.IsActive = req.IsActive
+	// Pertahankan IsActive tetap true agar selalu tampil di website Compro
+	existing.IsActive = true
 	existing.UpdatedBy = getUserUUID(c)
 
 	if err := h.DB.Save(&existing).Error; err != nil {

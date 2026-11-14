@@ -46,10 +46,20 @@ func main() {
 			&models.AuditLog{},
 		)
 
+		// Ensure all existing portfolios are active for compro visibility
+		_ = db.Model(&models.Portfolio{}).Where("is_active IS FALSE OR is_active IS NULL").Update("is_active", true)
+
 		// Auto-initialize default service categories if table is empty
 		var countCats int64
 		if err := db.Model(&models.ServiceCategory{}).Where("deleted_at IS NULL").Count(&countCats).Error; err == nil && countCats == 0 {
 			log.Println("Initializing default Service Categories master data...")
+			_ = seeder.Seed(db)
+		}
+
+		// Ensure portfolios are seeded if table is empty
+		var countPortfolios int64
+		if err := db.Model(&models.Portfolio{}).Where("deleted_at IS NULL").Count(&countPortfolios).Error; err == nil && countPortfolios == 0 {
+			log.Println("Initializing default Portfolios...")
 			_ = seeder.Seed(db)
 		}
 	}

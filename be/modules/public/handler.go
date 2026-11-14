@@ -26,7 +26,9 @@ func NewHandler(db *gorm.DB) *Handler {
 
 // GetHomeSections returns all active landing page sections for the public site
 func (h *Handler) GetHomeSections(c *gin.Context) {
-	c.Header("Cache-Control", "public, max-age=15, stale-while-revalidate=120")
+	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+	c.Header("Pragma", "no-cache")
+	c.Header("Expires", "0")
 	// If database is not connected, return company profile data from JSON storage
 	if h.DB == nil {
 		log.Println("[Public API] Database connection is nil, serving dynamic compro data from storage.")
@@ -150,7 +152,9 @@ func getDefaultComproData() gin.H {
 
 // GetServiceCategories returns active solution categories master data for public consumption
 func (h *Handler) GetServiceCategories(c *gin.Context) {
-	c.Header("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
+	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+	c.Header("Pragma", "no-cache")
+	c.Header("Expires", "0")
 	if h.DB == nil {
 		helper.JsonResponse(c, true, "Service categories loaded", getDefaultServiceCategoriesList(), nil, http.StatusOK)
 		return

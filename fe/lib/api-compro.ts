@@ -167,7 +167,13 @@ export interface InquiryPayload {
 // Fetch Landing page dynamic sections from Go backend
 export async function fetchComproHomeData(): Promise<ComproHomeResponse | null> {
   try {
-    const res = await comproApi.get("/public/home");
+    const res = await comproApi.get("/public/home", {
+      params: { _t: Date.now() },
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+      },
+    });
     if (res.data && res.data.status && res.data.data) {
       return res.data.data as ComproHomeResponse;
     }
@@ -330,7 +336,10 @@ export async function deleteAdminService(id: string): Promise<{ success: boolean
 // Portfolios CRUD
 export async function getAdminPortfolios(): Promise<PortfolioData[]> {
   try {
-    const res = await comproApi.get("/admin/sections/portfolios");
+    const res = await comproApi.get("/admin/sections/portfolios", {
+      params: { _t: Date.now() },
+      headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+    });
     if (res.data && res.data.status && Array.isArray(res.data.data)) return res.data.data;
     return [];
   } catch (error) {
@@ -542,7 +551,13 @@ export async function getAdminAuditLogs(): Promise<AdminAuditLogItem[]> {
 
 export async function getPublicServiceCategories(): Promise<ServiceCategoryData[]> {
   try {
-    const res = await comproApi.get("/public/service-categories");
+    const res = await comproApi.get("/public/service-categories", {
+      params: { _t: Date.now() },
+      headers: {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        Pragma: "no-cache",
+      },
+    });
     if (res.data && res.data.status && Array.isArray(res.data.data) && res.data.data.length > 0) {
       return res.data.data;
     }
@@ -555,7 +570,10 @@ export async function getPublicServiceCategories(): Promise<ServiceCategoryData[
 
 export async function getAdminServiceCategories(): Promise<ServiceCategoryData[]> {
   try {
-    const res = await comproApi.get("/admin/sections/categories");
+    const res = await comproApi.get("/admin/sections/categories", {
+      params: { _t: Date.now() },
+      headers: { "Cache-Control": "no-cache", Pragma: "no-cache" },
+    });
     if (res.data && res.data.status && Array.isArray(res.data.data) && res.data.data.length > 0) {
       return res.data.data;
     }
