@@ -9,12 +9,11 @@ interface CtaBannerProps {
 }
 
 export default function CtaBanner({ data, onOpenContactModal }: CtaBannerProps) {
-  const headline =
-    data?.headline || "Siap Mengintegrasikan Sistem IT & Keamanan Fasilitas Anda?";
-  const subtext =
-    data?.subtext ||
-    "Mitra terpercaya BUMN & industri sejak 2019 untuk Software Development, System Integration, dan Keamanan Akses.";
-  const buttonText = data?.button_text || "Contact Us";
+  if (!data || !data.headline) return null;
+
+  const headline = data.headline;
+  const subtext = data.subtext || "";
+  const buttonText = data.button_text || "Hubungi Kami";
 
   const handleButtonClick = () => {
     if (data?.button_action_type === "LINK" && data?.button_target) {

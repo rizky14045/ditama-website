@@ -53,8 +53,9 @@ type SiteSetting struct {
 	EmailOfficial      string         `gorm:"size:100" json:"email_official"`
 	WebsiteURL         string         `gorm:"size:150" json:"website_url"`
 	SocialLinks        string         `gorm:"type:jsonb;default:'{}'" json:"social_links"`
-	SeoMetaTitle       string         `gorm:"size:70;not null" json:"seo_meta_title"`
-	SeoMetaDescription string         `gorm:"size:160;not null" json:"seo_meta_description"`
+	SeoMetaTitle       string         `gorm:"size:255;not null" json:"seo_meta_title"`
+	SeoMetaDescription string         `gorm:"size:500;not null" json:"seo_meta_description"`
+	SeoKeywords        string         `gorm:"type:text" json:"seo_keywords"`
 	SeoOgImageURL      string         `gorm:"type:text" json:"seo_og_image_url"`
 	CreatedAt          time.Time      `gorm:"autoCreateTime" json:"created_at"`
 	CreatedBy          *uuid.UUID     `gorm:"type:uuid" json:"created_by,omitempty"`
@@ -164,8 +165,8 @@ type Portfolio struct {
 	ChallengeSolutionDetail string `gorm:"type:text" json:"challenge_solution_detail"`
 	ThumbnailURL            string `gorm:"type:text" json:"thumbnail_url"`
 	ProjectYear             *int   `json:"project_year,omitempty"`
-	SeoMetaTitle            string `gorm:"size:70" json:"seo_meta_title"`
-	SeoMetaDescription      string `gorm:"size:160" json:"seo_meta_description"`
+	SeoMetaTitle            string `gorm:"size:255" json:"seo_meta_title"`
+	SeoMetaDescription      string `gorm:"size:500" json:"seo_meta_description"`
 	SeoOgImageURL           string `gorm:"type:text" json:"seo_og_image_url"`
 	IsFeatured              bool   `gorm:"default:true;not null" json:"is_featured"`
 	DisplayOrder            int    `gorm:"default:0" json:"display_order"`

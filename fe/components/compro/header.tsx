@@ -59,11 +59,13 @@ export default function Header({ data, onOpenContactModal }: HeaderProps) {
                 </div>
                 <div className="flex flex-col">
                   <span className="font-heading font-extrabold text-lg tracking-tight text-navy leading-none">
-                    PT. DITAMA
+                    {data?.site_settings?.company_name || "PT. Ditama Inti Teknologi"}
                   </span>
-                  <span className="text-[11px] font-semibold tracking-widest text-slate-500 uppercase mt-1">
-                    Inti Teknologi
-                  </span>
+                  {data?.site_settings?.company_tagline && (
+                    <span className="text-[11px] font-semibold tracking-widest text-slate-500 uppercase mt-1">
+                      {data.site_settings.company_tagline}
+                    </span>
+                  )}
                 </div>
               </>
             )}

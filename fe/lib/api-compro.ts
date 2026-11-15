@@ -56,6 +56,8 @@ export interface SiteSettingsData {
   social_links?: string;
   seo_meta_title?: string;
   seo_meta_description?: string;
+  seo_keywords?: string;
+  seo_og_image_url?: string;
 }
 
 export interface HeroData {

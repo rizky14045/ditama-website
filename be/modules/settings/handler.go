@@ -65,6 +65,9 @@ func loadSettingsFromFile() {
 				if loaded.SeoMetaDescription != "" {
 					CurrentSiteSettings.SeoMetaDescription = loaded.SeoMetaDescription
 				}
+				if loaded.SeoKeywords != "" {
+					CurrentSiteSettings.SeoKeywords = loaded.SeoKeywords
+				}
 			}
 		}
 	}
@@ -98,6 +101,7 @@ var CurrentSiteSettings = models.SiteSetting{
 	SocialLinks:        `{"linkedin":"https://linkedin.com/company/ditamadigital"}`,
 	SeoMetaTitle:       "PT. Ditama Inti Teknologi | Solusi IT, Gate System & General Supplier Industri",
 	SeoMetaDescription: "Mitra terpercaya BUMN & industri sejak 2019 untuk Software Development, System Integration, Smart Gate System, dan General Supplier bersertifikat CSMS K3.",
+	SeoKeywords:        "PT Ditama Inti Teknologi, Software Development Cilegon, IT Consultant, Gate Management System, Barrier Gate, Turnstile, Access Control, General Supplier Industri, CSMS PLN, System Integration SCADA",
 }
 
 func getDefaultSiteSettings() models.SiteSetting {
@@ -132,6 +136,7 @@ type UpdateSettingsRequest struct {
 	SocialLinks        string `json:"social_links"`
 	SeoMetaTitle       string `json:"seo_meta_title"`
 	SeoMetaDescription string `json:"seo_meta_description"`
+	SeoKeywords        string `json:"seo_keywords"`
 	SeoOgImageURL      string `json:"seo_og_image_url"`
 }
 
@@ -142,12 +147,12 @@ func (h *Handler) UpdateSettings(c *gin.Context) {
 		return
 	}
 
-	if len(req.SeoMetaTitle) > 70 {
-		helper.JsonResponse(c, false, "SEO Meta Title cannot exceed 70 characters", nil, "Validation failed", http.StatusBadRequest)
+	if len(req.SeoMetaTitle) > 255 {
+		helper.JsonResponse(c, false, "SEO Meta Title cannot exceed 255 characters", nil, "Validation failed", http.StatusBadRequest)
 		return
 	}
-	if len(req.SeoMetaDescription) > 160 {
-		helper.JsonResponse(c, false, "SEO Meta Description cannot exceed 160 characters", nil, "Validation failed", http.StatusBadRequest)
+	if len(req.SeoMetaDescription) > 500 {
+		helper.JsonResponse(c, false, "SEO Meta Description cannot exceed 500 characters", nil, "Validation failed", http.StatusBadRequest)
 		return
 	}
 
@@ -169,6 +174,7 @@ func (h *Handler) UpdateSettings(c *gin.Context) {
 		}
 		CurrentSiteSettings.SeoMetaTitle = req.SeoMetaTitle
 		CurrentSiteSettings.SeoMetaDescription = req.SeoMetaDescription
+		CurrentSiteSettings.SeoKeywords = req.SeoKeywords
 		CurrentSiteSettings.SeoOgImageURL = req.SeoOgImageURL
 
 		saveSettingsToFile(CurrentSiteSettings)
@@ -194,6 +200,7 @@ func (h *Handler) UpdateSettings(c *gin.Context) {
 			SocialLinks:        req.SocialLinks,
 			SeoMetaTitle:       req.SeoMetaTitle,
 			SeoMetaDescription: req.SeoMetaDescription,
+			SeoKeywords:        req.SeoKeywords,
 			SeoOgImageURL:      req.SeoOgImageURL,
 		}
 		if err := h.DB.Create(&newSettings).Error; err != nil {
@@ -231,6 +238,7 @@ func (h *Handler) UpdateSettings(c *gin.Context) {
 	}
 	existing.SeoMetaTitle = req.SeoMetaTitle
 	existing.SeoMetaDescription = req.SeoMetaDescription
+	existing.SeoKeywords = req.SeoKeywords
 	existing.SeoOgImageURL = req.SeoOgImageURL
 	existing.UpdatedBy = userUUID
 

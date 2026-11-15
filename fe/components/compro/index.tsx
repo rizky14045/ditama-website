@@ -13,9 +13,13 @@ import Footer from "./footer";
 import ContactModal from "./contact-modal";
 import { fetchComproHomeData, ComproHomeResponse } from "@/lib/api-compro";
 
-export default function ComproPage() {
+interface ComproPageProps {
+  initialData?: ComproHomeResponse | null;
+}
+
+export default function ComproPage({ initialData }: ComproPageProps) {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const [homeData, setHomeData] = useState<ComproHomeResponse | null>(null);
+  const [homeData, setHomeData] = useState<ComproHomeResponse | null>(initialData || null);
 
   useEffect(() => {
     // Attempt to fetch dynamic data from Go Backend

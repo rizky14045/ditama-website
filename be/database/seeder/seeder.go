@@ -128,12 +128,19 @@ func seedSiteSettings(db *gorm.DB) error {
 			SocialLinks:        `{"linkedin":"https://linkedin.com/company/ditamadigital","instagram":"https://instagram.com/ditamadigital"}`,
 			SeoMetaTitle:       "PT. Ditama Inti Teknologi | Solusi IT, Gate System & General Supplier",
 			SeoMetaDescription: "Mitra terpercaya BUMN & industri sejak 2019 untuk Software Development, System Integration, Smart Gate System, dan General Supplier bersertifikat CSMS K3.",
+			SeoKeywords:        "PT Ditama Inti Teknologi, Software Development Cilegon, IT Consultant, Gate Management System, Barrier Gate, Turnstile, Access Control, General Supplier Industri, CSMS PLN, System Integration SCADA",
 			SeoOgImageURL:      "/assets/images/og-image.jpg",
 		}
 		if err := db.Create(&settings).Error; err != nil {
 			return err
 		}
 		log.Println("  -> Site settings seeded")
+	} else {
+		var existing models.SiteSetting
+		if err := db.Where("deleted_at IS NULL").First(&existing).Error; err == nil && existing.SeoKeywords == "" {
+			db.Model(&existing).Update("seo_keywords", "PT Ditama Inti Teknologi, Software Development Cilegon, IT Consultant, Gate Management System, Barrier Gate, Turnstile, Access Control, General Supplier Industri, CSMS PLN, System Integration SCADA")
+			log.Println("  -> Site settings updated with default SEO keywords")
+		}
 	}
 	return nil
 }

@@ -1,72 +1,82 @@
 import type { Metadata } from "next";
 import ComproPage from "@/components/compro";
+import { fetchComproHomeData } from "@/lib/api-compro";
 
-export const metadata: Metadata = {
-  title: "PT. Ditama Inti Teknologi | Solusi IT, Gate System & General Supplier Industri",
-  description:
-    "PT. Ditama Inti Teknologi adalah mitra terpercaya BUMN & industri sejak 2019 untuk layanan Software Development, System Integration, Smart Gate System, Access Control, CCTV, dan General Supplier bersertifikat CSMS K3.",
-  keywords: [
-    "PT Ditama Inti Teknologi",
-    "Software Development Cilegon",
-    "IT Consultant",
-    "Gate Management System",
-    "Barrier Gate",
-    "Turnstile",
-    "Access Control",
-    "General Supplier Industri",
-    "CSMS PLN",
-    "System Integration SCADA",
-  ],
-  authors: [{ name: "PT. Ditama Inti Teknologi" }],
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/favicon.ico",
-  },
-  alternates: {
-    canonical: "https://www.ditamadigital.co.id/",
-  },
-  openGraph: {
-    type: "website",
-    title: "PT. Ditama Inti Teknologi | Solusi IT Terintegrasi & Gate System",
-    description:
-      "Mitra terpercaya BUMN & industri untuk Software Development, System Integration, Keamanan Akses, dan General Supplier.",
-    url: "https://www.ditamadigital.co.id/",
-    siteName: "PT. Ditama Inti Teknologi",
-    locale: "id_ID",
-  },
-};
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "PT. Ditama Inti Teknologi",
-  url: "https://www.ditamadigital.co.id",
-  foundingDate: "2019",
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "Komp. PCI Blok D 115 No. 06-07",
-    addressLocality: "Cilegon",
-    addressRegion: "Banten",
-    postalCode: "42423",
-    addressCountry: "ID",
-  },
-  contactPoint: {
-    "@type": "ContactPoint",
-    telephone: "+62-813-1050-6456",
-    contactType: "sales",
-    email: "ditamadigital@gmail.com",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const homeData = await fetchComproHomeData();
+  const settings = homeData?.site_settings;
 
-export default function Page() {
+  const siteTitle =
+    settings?.seo_meta_title || settings?.company_name || "PT. Ditama Inti Teknologi";
+  const siteDesc =
+    settings?.seo_meta_description || settings?.footer_description || "";
+  const siteKeywords = settings?.seo_keywords
+    ? settings.seo_keywords
+        .split(",")
+        .map((k) => k.trim())
+        .filter(Boolean)
+    : [];
+  const siteUrl = settings?.website_url || "https://www.ditamadigital.co.id/";
+  const favicon = settings?.favicon_url || "/favicon.ico";
+  const ogImage = settings?.seo_og_image_url || settings?.logo_url;
+
+  return {
+    title: siteTitle,
+    description: siteDesc,
+    keywords: siteKeywords,
+    authors: [{ name: settings?.company_name || "PT. Ditama Inti Teknologi" }],
+    icons: {
+      icon: favicon,
+      shortcut: favicon,
+      apple: favicon,
+    },
+    alternates: {
+      canonical: siteUrl,
+    },
+    openGraph: {
+      type: "website",
+      title: siteTitle,
+      description: siteDesc,
+      url: siteUrl,
+      siteName: settings?.company_name || "PT. Ditama Inti Teknologi",
+      locale: "id_ID",
+      images: ogImage ? [{ url: ogImage }] : undefined,
+    },
+  };
+}
+
+export default async function Page() {
+  const homeData = await fetchComproHomeData();
+  const settings = homeData?.site_settings;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: settings?.company_name || "PT. Ditama Inti Teknologi",
+    url: settings?.website_url || "https://www.ditamadigital.co.id",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: settings?.office_address || "",
+      addressCountry: "ID",
+    },
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: settings?.phone_whatsapp || "",
+      contactType: "sales",
+      email: settings?.email_official || "",
+    },
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <ComproPage />
+      <ComproPage initialData={homeData} />
     </>
   );
 }

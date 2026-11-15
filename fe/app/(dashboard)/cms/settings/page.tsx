@@ -28,8 +28,9 @@ export default function CmsSettingsPage() {
     office_address: "Komp. PCI Blok D 115 No. 06-07, Cilegon - Banten 42423",
     pic_name: "Rezza Prawiratama",
     website_url: "https://www.ditamadigital.co.id",
-    seo_meta_title: "PT. Ditama Inti Teknologi | Solusi IT, Gate System & General Supplier Industri",
-    seo_meta_description: "Mitra terpercaya BUMN & industri sejak 2019 untuk Software Development, System Integration, Smart Gate System, dan General Supplier bersertifikat CSMS K3.",
+    seo_meta_title: "",
+    seo_meta_description: "",
+    seo_keywords: "",
   });
 
   useEffect(() => {
@@ -530,10 +531,16 @@ export default function CmsSettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="seo_meta_title">Judul Meta SEO (Title Tag)</Label>
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="seo_meta_title">Judul Meta SEO (Title Tag)</Label>
+                  <span className="text-xs text-slate-400">
+                    {(formData.seo_meta_title || "").length}/255 karakter (Rekomendasi Google: ~50–70 karakter)
+                  </span>
+                </div>
                 <Input
                   id="seo_meta_title"
                   name="seo_meta_title"
+                  maxLength={255}
                   value={formData.seo_meta_title || ""}
                   onChange={handleChange}
                   placeholder="PT. Ditama Inti Teknologi | Solusi IT, Gate System & General Supplier Industri"
@@ -541,11 +548,31 @@ export default function CmsSettingsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="seo_meta_description">Deskripsi Meta SEO (Meta Description)</Label>
+                <Label htmlFor="seo_keywords">Kata Kunci Meta SEO (Keywords)</Label>
+                <Input
+                  id="seo_keywords"
+                  name="seo_keywords"
+                  value={formData.seo_keywords || ""}
+                  onChange={handleChange}
+                  placeholder="Contoh: PT Ditama Inti Teknologi, Software Development, Gate System, General Supplier, CSMS K3"
+                />
+                <p className="text-[11px] text-slate-400">
+                  Pisahkan setiap kata kunci dengan tanda koma (,)
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="seo_meta_description">Deskripsi Meta SEO (Meta Description)</Label>
+                  <span className="text-xs text-slate-400">
+                    {(formData.seo_meta_description || "").length}/500 karakter (Rekomendasi Google: ~120–160 karakter)
+                  </span>
+                </div>
                 <Textarea
                   id="seo_meta_description"
                   name="seo_meta_description"
                   rows={3}
+                  maxLength={500}
                   value={formData.seo_meta_description || ""}
                   onChange={handleChange}
                   placeholder="Deskripsi singkat yang informatif mengenai layanan PT. Ditama Inti Teknologi..."

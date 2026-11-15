@@ -8,15 +8,15 @@ interface HeroProps {
 }
 
 export default function Hero({ data }: HeroProps) {
-  const badgeText = data?.badge_text || "Mitra Terpercaya BUMN & Industri Sejak 2019";
-  const headline = data?.headline_h1 || "Solusi IT Terintegrasi, Gate System & General Supplier Industri";
-  const subheadline =
-    data?.subheadline ||
-    "Menyediakan layanan Software Development, System Integration, Keamanan Akses (Gate & CCTV), serta pengadaan mekanikal & elektrikal berstandar K3.";
-  const primaryText = data?.primary_cta_text || "Hubungi Kami";
-  const primaryLink = data?.primary_cta_link || "#kontak";
-  const secondaryText = data?.secondary_cta_text || "Lihat Portofolio";
-  const secondaryLink = data?.secondary_cta_link || "#portofolio";
+  if (!data || !data.headline_h1) return null;
+
+  const badgeText = data.badge_text || "";
+  const headline = data.headline_h1;
+  const subheadline = data.subheadline || "";
+  const primaryText = data.primary_cta_text || "Hubungi Kami";
+  const primaryLink = data.primary_cta_link || "#kontak";
+  const secondaryText = data.secondary_cta_text || "Lihat Portofolio";
+  const secondaryLink = data.secondary_cta_link || "#portofolio";
 
   return (
     <section id="beranda" className="relative bg-navy text-white overflow-hidden">
@@ -34,10 +34,12 @@ export default function Hero({ data }: HeroProps) {
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 text-center">
         <div className="space-y-8 max-w-4xl mx-auto">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/15 text-amberbrand text-xs sm:text-sm font-semibold tracking-wide">
-            <span className="w-2 h-2 rounded-full bg-amberbrand" />
-            {badgeText}
-          </div>
+          {badgeText && (
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/15 text-amberbrand text-xs sm:text-sm font-semibold tracking-wide">
+              <span className="w-2 h-2 rounded-full bg-amberbrand" />
+              {badgeText}
+            </div>
+          )}
 
           {/* Main H1 Headline */}
           <h1 className="font-heading font-extrabold text-3xl sm:text-5xl lg:text-[54px] leading-tight tracking-tight text-white">

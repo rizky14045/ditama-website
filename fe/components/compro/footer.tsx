@@ -10,15 +10,13 @@ interface FooterProps {
 export default function Footer({ data }: FooterProps) {
   const settings = data?.site_settings;
   const companyName = settings?.company_name || "PT. DITAMA INTI TEKNOLOGI";
-  const tagline = settings?.company_tagline || "General Supplier, IT Solution & System Integration";
-  const address = settings?.office_address || "Komp. PCI Blok D 115 No. 06-07, Cilegon - Banten 42423";
-  const phone = settings?.phone_whatsapp || "+62813-1050-6456";
+  const tagline = settings?.company_tagline || "";
+  const address = settings?.office_address || "";
+  const phone = settings?.phone_whatsapp || "";
   const phoneClean = phone.replace(/[^0-9+]/g, "");
-  const email = settings?.email_official || "ditamadigital@gmail.com";
-  const website = settings?.website_url || "https://www.ditamadigital.co.id";
-  const footerDesc =
-    settings?.footer_description ||
-    "Perusahaan perdagangan umum dan jasa teknologi terintegrasi yang berfokus pada kecepatan layanan, kualitas pengerjaan, dan kepatuhan keselamatan kerja K3.";
+  const email = settings?.email_official || "";
+  const website = settings?.website_url || "";
+  const footerDesc = settings?.footer_description || "";
 
   return (
     <footer id="kontak" className="bg-navy-dark text-slate-300 border-t border-white/10">
