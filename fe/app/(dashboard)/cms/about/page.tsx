@@ -10,50 +10,23 @@ import { toast } from "sonner";
 import { getAdminAbout, updateAdminAbout, AboutData, ValuePillarItem } from "@/lib/api-compro";
 import { Icon } from "@iconify/react";
 
-const DEFAULT_PILLARS: ValuePillarItem[] = [
-  {
-    number: "01",
-    title: "Solusi Cepat & Presisi",
-    description: "Respon tanggap kebutuhan pengadaan & integrasi IT.",
-  },
-  {
-    number: "02",
-    title: "Kualitas Mutu Terjamin",
-    description: "Produk hardware & software bergaransi resmi.",
-  },
-  {
-    number: "03",
-    title: "Dukungan Tenaga Ahli",
-    description: "Tim teknisi tersertifikasi & berpengalaman lapangan.",
-  },
-];
-
 export default function CmsAboutPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState<Partial<AboutData>>({
-    title: "Tentang PT. Ditama Inti Teknologi",
-    description_html:
-      "Berdiri sejak tahun 2019 di Cilegon, Banten, PT. DITAMA INTI TEKNOLOGI merupakan perusahaan perdagangan umum dan jasa yang bergerak di bidang General Supplier, IT Solution & Multimedia, System Integration, serta Electrical Services. Kami berkomitmen menghadirkan solusi industri yang cepat, terintegrasi, dan berorientasi pada kualitas mutu tinggi.",
-    vision_text:
-      "Menjadi perusahaan General Supplier dan penyedia solusi teknologi terintegrasi di Indonesia yang terkemuka dalam pertumbuhan, efisiensi, dan reputasi.",
-    mission_items:
-      '["Menyediakan solusi bernilai tambah yang mengoptimalkan kepuasan pelanggan.", "Menciptakan lapangan kerja berkualitas dan berperan aktif sebagai warga korporat yang baik.", "Memberikan layanan prima dengan kecepatan dan presisi tinggi."]',
+    title: "",
+    description_html: "",
+    vision_text: "",
+    mission_items: "",
     established_year: 2019,
-    experience_badge: "Pengalaman Industri",
-    experience_years: "7+ Tahun",
-    experience_desc:
-      "Melayani berbagai perusahaan terkemuka, BUMN, dan kawasan industri di Indonesia sejak tahun 2019.",
+    experience_badge: "",
+    experience_years: "",
+    experience_desc: "",
   });
 
-  const [missions, setMissions] = useState<string[]>([
-    "Menyediakan solusi bernilai tambah yang mengoptimalkan kepuasan pelanggan.",
-    "Menciptakan lapangan kerja berkualitas dan berperan aktif sebagai warga korporat yang baik.",
-    "Memberikan layanan prima dengan kecepatan dan presisi tinggi.",
-  ]);
-
-  const [pillars, setPillars] = useState<ValuePillarItem[]>(DEFAULT_PILLARS);
+  const [missions, setMissions] = useState<string[]>([]);
+  const [pillars, setPillars] = useState<ValuePillarItem[]>([]);
   const [newMission, setNewMission] = useState("");
 
   useEffect(() => {

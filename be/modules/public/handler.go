@@ -29,18 +29,29 @@ func (h *Handler) GetHomeSections(c *gin.Context) {
 	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
 	c.Header("Pragma", "no-cache")
 	c.Header("Expires", "0")
-	// If database is not connected, return company profile data from JSON storage
+	// If database is not connected, return empty structure
 	if h.DB == nil {
 		log.Println("[Public API] Database connection is nil, serving dynamic compro data from storage.")
 		helper.JsonResponse(c, true, "Company profile data loaded successfully", getDefaultComproData(), nil, http.StatusOK)
 		return
 	}
 
-	data := getDefaultComproData()
+	data := gin.H{
+		"site_settings":             models.SiteSetting{},
+		"hero":                      models.HeroSection{},
+		"about":                     models.AboutSection{},
+		"certifications_legalities": []models.CertificationLegality{},
+		"services":                  []models.Service{},
+		"service_categories":        []models.ServiceCategory{},
+		"portfolios":                []models.Portfolio{},
+		"clients":                   []models.ClientPartner{},
+		"tech_partners":             []models.ClientPartner{},
+		"cta_banner":                models.CtaBanner{},
+	}
 
 	// 1. Site Settings
 	var siteSettings models.SiteSetting
-	if err := h.DB.Where("deleted_at IS NULL").First(&siteSettings).Error; err == nil && siteSettings.CompanyName != "" {
+	if err := h.DB.Where("deleted_at IS NULL").First(&siteSettings).Error; err == nil {
 		data["site_settings"] = siteSettings
 	}
 
@@ -68,12 +79,10 @@ func (h *Handler) GetHomeSections(c *gin.Context) {
 		data["services"] = services
 	}
 
-	// 5b. Service Categories Master Data (Software Solution, Security System, System Integrator)
+	// 5b. Service Categories Master Data
 	var serviceCategories []models.ServiceCategory
-	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&serviceCategories).Error; err == nil && len(serviceCategories) > 0 {
+	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&serviceCategories).Error; err == nil {
 		data["service_categories"] = serviceCategories
-	} else {
-		data["service_categories"] = getDefaultServiceCategoriesList()
 	}
 
 	// 6. Portfolios
@@ -156,12 +165,12 @@ func (h *Handler) GetServiceCategories(c *gin.Context) {
 	c.Header("Pragma", "no-cache")
 	c.Header("Expires", "0")
 	if h.DB == nil {
-		helper.JsonResponse(c, true, "Service categories loaded", getDefaultServiceCategoriesList(), nil, http.StatusOK)
+		helper.JsonResponse(c, true, "Service categories loaded", []models.ServiceCategory{}, nil, http.StatusOK)
 		return
 	}
 	var categories []models.ServiceCategory
-	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&categories).Error; err != nil || len(categories) == 0 {
-		helper.JsonResponse(c, true, "Service categories loaded (default)", getDefaultServiceCategoriesList(), nil, http.StatusOK)
+	if err := h.DB.Where("is_active = TRUE AND deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&categories).Error; err != nil {
+		helper.JsonResponse(c, true, "Service categories loaded (empty)", []models.ServiceCategory{}, nil, http.StatusOK)
 		return
 	}
 	helper.JsonResponse(c, true, "Service categories loaded successfully", categories, nil, http.StatusOK)

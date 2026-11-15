@@ -16,12 +16,11 @@ import {
   updateAdminServiceCategory,
   deleteAdminServiceCategory,
   ServiceCategoryData,
-  DEFAULT_SERVICE_CATEGORIES,
 } from "@/lib/api-compro";
 import { Icon } from "@iconify/react";
 
 export default function CmsCategoriesPage() {
-  const [categories, setCategories] = useState<ServiceCategoryData[]>(DEFAULT_SERVICE_CATEGORIES);
+  const [categories, setCategories] = useState<ServiceCategoryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ServiceCategoryData | null>(null);

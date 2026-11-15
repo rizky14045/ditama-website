@@ -3,32 +3,12 @@
 import React from "react";
 import { ClientPartnerData } from "@/lib/api-compro";
 
-const DEFAULT_CLIENTS = [
-  "PT. PLN Indonesia Power",
-  "PT. PLN Nusantara Power",
-  "PT. Krakatau Posco",
-  "Bank Indonesia",
-  "BNPB",
-  "PT. Semen Gresik",
-  "Shopee",
-];
-
 interface TrustBarProps {
   data?: ClientPartnerData[];
 }
 
 export default function TrustBar({ data }: TrustBarProps) {
-  const clients: ClientPartnerData[] =
-    data === undefined
-      ? DEFAULT_CLIENTS.map((name, idx) => ({
-          id: `default-client-${idx}`,
-          name,
-          type: "CLIENT" as const,
-          logo_url: "",
-          website_url: "",
-          display_order: idx + 1,
-        }))
-      : data;
+  const clients: ClientPartnerData[] = data || [];
 
   if (clients.length === 0) return null;
 

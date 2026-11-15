@@ -7,65 +7,6 @@ interface ServicesProps {
   data?: ServiceData[];
 }
 
-const DEFAULT_SERVICES = [
-  {
-    id: "it-solution",
-    title: "IT Solution & Multimedia",
-    slug: "it-solution",
-    short_description:
-      "Pengembangan aplikasi kustom sesuai alur bisnis perusahaan dan produksi media visual interaktif.",
-    bullets: [
-      "Custom Software (Web & Mobile)",
-      "AI & OCR Plat Nomor Kendaraan",
-      "Visitor Management & People Counting",
-      "Animasi 2D/3D Safety Induction",
-    ],
-    display_order: 1,
-  },
-  {
-    id: "system-integration",
-    title: "System Integration",
-    slug: "system-integration",
-    short_description:
-      "Menghubungkan perangkat keras, sensor lapangan, dan basis data ke dalam satu dashboard terpusat.",
-    bullets: [
-      "Integrasi SCADA, MAXIMO & ELLIPSE",
-      "Sinkronisasi Data Pembangkit",
-      "Dashboard Pemantauan Lintas Unit",
-      "Infrastruktur Jaringan & Server",
-    ],
-    display_order: 2,
-  },
-  {
-    id: "gate-security",
-    title: "Gate & Security System",
-    slug: "gate-security",
-    short_description:
-      "Sistem kontrol akses fisik dan keamanan area berisiko tinggi untuk pabrik, gedung, dan kawasan vital.",
-    bullets: [
-      "Barrier Gate & Gate Management System",
-      "Turnstile Full High & Tripod",
-      "Access Control Door & Alarm",
-      "Instalasi & Maintenance CCTV",
-    ],
-    display_order: 3,
-  },
-  {
-    id: "general-supplier",
-    title: "General Supplier & Electrical",
-    slug: "general-supplier",
-    short_description:
-      "Pengadaan suku cadang industri serta jasa pemeliharaan kelistrikan dan konstruksi penunjang.",
-    bullets: [
-      "Produk Mekanikal, Elektrikal & Instrumen",
-      "Maintenance Lift & Motor Generator",
-      "Rewinding Motor AC/DC (Low-High Volt)",
-      "Fabrikasi & Instalasi Struktur 6KV",
-    ],
-    display_order: 4,
-  },
-];
-
 function getServiceIcon(slugOrName?: string, index: number = 0) {
   const key = (slugOrName || "").toLowerCase();
   if (key.includes("gate") || key.includes("security") || key.includes("keamanan") || index === 2) {
@@ -115,8 +56,8 @@ function parseBullets(raw: string | undefined): string[] {
 
 export default function Services({ data }: ServicesProps) {
   const serviceList =
-    data === undefined
-      ? DEFAULT_SERVICES
+    !data || data.length === 0
+      ? []
       : data.map((item, idx) => ({
           id: item.id || `srv-${idx}`,
           title: item.title,
@@ -125,6 +66,8 @@ export default function Services({ data }: ServicesProps) {
           bullets: parseBullets(item.bullet_features),
           display_order: item.display_order ?? idx + 1,
         }));
+
+  if (serviceList.length === 0) return null;
 
   return (
     <section id="layanan" className="py-16 lg:py-24 bg-icegray border-y border-slate-200/80">

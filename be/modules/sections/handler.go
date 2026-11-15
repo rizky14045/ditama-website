@@ -1203,21 +1203,8 @@ func (h *Handler) ListServiceCategories(c *gin.Context) {
 	}
 	var cats []models.ServiceCategory
 	if err := h.DB.Where("deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&cats).Error; err != nil {
-		helper.JsonResponse(c, true, "Loaded default service categories", getDefaultServiceCategories(), nil, http.StatusOK)
+		helper.JsonResponse(c, true, "Loaded service categories (empty)", []models.ServiceCategory{}, nil, http.StatusOK)
 		return
-	}
-	if len(cats) == 0 {
-		defaults := getDefaultServiceCategories()
-		for _, d := range defaults {
-			var chk models.ServiceCategory
-			if err := h.DB.Where("code = ?", d.Code).First(&chk).Error; err != nil {
-				_ = h.DB.Create(&d)
-			}
-		}
-		_ = h.DB.Where("deleted_at IS NULL").Order("display_order ASC, created_at ASC").Find(&cats)
-		if len(cats) == 0 {
-			cats = defaults
-		}
 	}
 	helper.JsonResponse(c, true, "Service categories fetched", cats, nil, http.StatusOK)
 }

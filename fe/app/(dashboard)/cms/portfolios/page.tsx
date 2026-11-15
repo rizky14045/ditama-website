@@ -18,7 +18,6 @@ import {
   getAdminServiceCategories,
   PortfolioData,
   ServiceCategoryData,
-  DEFAULT_SERVICE_CATEGORIES,
 } from "@/lib/api-compro";
 import { Icon } from "@iconify/react";
 import ImageUploadDropzone from "@/components/common/image-upload-dropzone";
@@ -71,7 +70,7 @@ function normalizeCategoryCode(cat: string): string {
 
 export default function CmsPortfoliosPage() {
   const [portfolios, setPortfolios] = useState<PortfolioData[]>([]);
-  const [categories, setCategories] = useState<ServiceCategoryData[]>(DEFAULT_SERVICE_CATEGORIES);
+  const [categories, setCategories] = useState<ServiceCategoryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<PortfolioData | null>(null);

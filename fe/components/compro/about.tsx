@@ -7,32 +7,10 @@ interface AboutProps {
   data?: AboutData | null;
 }
 
-const DEFAULT_VALUE_PILLARS: ValuePillarItem[] = [
-  {
-    number: "01",
-    title: "Solusi Cepat & Presisi",
-    description: "Respon tanggap kebutuhan pengadaan & integrasi IT.",
-  },
-  {
-    number: "02",
-    title: "Kualitas Mutu Terjamin",
-    description: "Produk hardware & software bergaransi resmi.",
-  },
-  {
-    number: "03",
-    title: "Dukungan Tenaga Ahli",
-    description: "Tim teknisi tersertifikasi & berpengalaman lapangan.",
-  },
-];
-
 export default function About({ data }: AboutProps) {
-  const defaultMissions = [
-    "Menyediakan solusi bernilai tambah yang mengoptimalkan kepuasan pelanggan.",
-    "Menciptakan lapangan kerja berkualitas dan berperan aktif sebagai warga korporat yang baik.",
-    "Memberikan layanan prima dengan kecepatan dan presisi tinggi.",
-  ];
+  if (!data || !data.title) return null;
 
-  let missionList = defaultMissions;
+  let missionList: string[] = [];
   if (data?.mission_items) {
     try {
       const parsed = JSON.parse(data.mission_items);
@@ -54,7 +32,7 @@ export default function About({ data }: AboutProps) {
     data?.experience_desc ||
     `Melayani berbagai perusahaan terkemuka, BUMN, dan kawasan industri di Indonesia sejak tahun ${establishedYear}.`;
 
-  let valuePillars = DEFAULT_VALUE_PILLARS;
+  let valuePillars: ValuePillarItem[] = [];
   if (data?.value_pillars) {
     try {
       const parsedPillars = JSON.parse(data.value_pillars);
@@ -175,28 +153,30 @@ export default function About({ data }: AboutProps) {
             </div>
 
             {/* Poin Keunggulan Nilai (Value Pillars) */}
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3.5">
-              {valuePillars.map((pillar, idx) => {
-                const colorClass = numberBgColors[idx % numberBgColors.length];
-                return (
-                  <div key={idx} className="flex items-center gap-3">
-                    <div
-                      className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-bold font-heading text-xs ${colorClass}`}
-                    >
-                      {pillar.number || `0${idx + 1}`}
+            {valuePillars.length > 0 && (
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3.5">
+                {valuePillars.map((pillar, idx) => {
+                  const colorClass = numberBgColors[idx % numberBgColors.length];
+                  return (
+                    <div key={idx} className="flex items-center gap-3">
+                      <div
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-bold font-heading text-xs ${colorClass}`}
+                      >
+                        {pillar.number || `0${idx + 1}`}
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-navy font-heading">
+                          {pillar.title}
+                        </h4>
+                        <p className="text-[11px] text-slate-500 leading-tight mt-0.5">
+                          {pillar.description}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-navy font-heading">
-                        {pillar.title}
-                      </h4>
-                      <p className="text-[11px] text-slate-500 leading-tight mt-0.5">
-                        {pillar.description}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>

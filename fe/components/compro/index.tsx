@@ -15,17 +15,7 @@ import { fetchComproHomeData, ComproHomeResponse } from "@/lib/api-compro";
 
 export default function ComproPage() {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const [homeData, setHomeData] = useState<ComproHomeResponse | null>({
-    site_settings: {
-      company_name: "PT. Ditama Inti Teknologi",
-      company_tagline: "General Supplier, IT Solution & System Integration",
-      logo_url: "/uploads/bb37bc4a-32f9-4b01-a764-028de1abf0a6.png",
-      favicon_url: "/uploads/bb37bc4a-32f9-4b01-a764-028de1abf0a6.png",
-      office_address: "Komp. PCI Blok D 115 No. 06-07, Cilegon - Banten 42423",
-      phone_whatsapp: "+62813-1050-6456",
-      email_official: "ditamadigital@gmail.com",
-    },
-  });
+  const [homeData, setHomeData] = useState<ComproHomeResponse | null>(null);
 
   useEffect(() => {
     // Attempt to fetch dynamic data from Go Backend

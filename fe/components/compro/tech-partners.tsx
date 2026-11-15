@@ -3,34 +3,12 @@
 import React from "react";
 import { ClientPartnerData } from "@/lib/api-compro";
 
-const DEFAULT_PARTNERS = [
-  { name: "Honeywell", style: "tracking-tight font-extrabold" },
-  { name: "CISCO", style: "tracking-widest font-extrabold" },
-  { name: "HIKVISION", style: "tracking-wide font-extrabold" },
-  { name: "Dahua Technology", style: "font-extrabold" },
-  { name: "ZKTeco", style: "tracking-wide font-extrabold" },
-  { name: "Hanwha Vision", style: "font-extrabold" },
-  { name: "Texecom", style: "font-extrabold" },
-  { name: "FALCO", style: "tracking-wider font-extrabold" },
-  { name: "LS-AG Cable Indonesia", style: "font-extrabold" },
-];
-
 interface TechPartnersProps {
   data?: ClientPartnerData[];
 }
 
 export default function TechPartners({ data }: TechPartnersProps) {
-  const partners: ClientPartnerData[] =
-    data === undefined
-      ? DEFAULT_PARTNERS.map((p, idx) => ({
-          id: `default-partner-${idx}`,
-          name: p.name,
-          type: "TECH_PARTNER" as const,
-          logo_url: "",
-          website_url: "",
-          display_order: idx + 1,
-        }))
-      : data;
+  const partners: ClientPartnerData[] = data || [];
 
   if (partners.length === 0) return null;
 

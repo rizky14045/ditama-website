@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { PortfolioData, ServiceCategoryData, DEFAULT_SERVICE_CATEGORIES } from "@/lib/api-compro";
+import { PortfolioData, ServiceCategoryData } from "@/lib/api-compro";
 
 type CategoryFilter = string;
 
@@ -22,81 +22,6 @@ interface DisplayPortfolioItem {
   highlightText?: string;
   badgeLabel?: string;
 }
-
-const DEFAULT_PORTFOLIO_ITEMS: DisplayPortfolioItem[] = [
-  {
-    id: "pln-sidak",
-    category: "software",
-    categoryLabel: "Software Solution",
-    client: "PT. PLN Nusantara Power",
-    title: "E-Preventive Maintenance & SIDAK AI",
-    description:
-      "Aplikasi mobile dan website untuk eksekusi preventive maintenance PLTU serta Sistem Data Keamanan (SIDAK) seluruh unit dengan AI rekap data & pemetaan kerawanan.",
-    gradientClass: "from-navy to-navy-light",
-    badgeLabel: "Enterprise Web & Mobile",
-    highlightText: "AI Preventive & SIDAK Analytics",
-  },
-  {
-    id: "semen-gresik",
-    category: "security",
-    categoryLabel: "Security System",
-    client: "PT. Semen Gresik Rembang Tbk.",
-    title: "Turnstile Full High & People Counting",
-    description:
-      "Pemasangan unit Turnstile Full High, sistem Access Control terpadu, serta integrasi sistem Vault dengan fitur Custom People Counting untuk akurasi data personel pabrik.",
-    gradientClass: "from-slate-800 to-navy",
-    highlightText: "Full Height Turnstile & Vault",
-    badgeLabel: "Custom People Counting Integration",
-  },
-  {
-    id: "gleneagles-hospital",
-    category: "security",
-    categoryLabel: "Security System",
-    client: "Gleneagles KL & Likas Hospital",
-    title: "Access Control & Radiation Protection",
-    description:
-      "Sistem integrasi dan instalasi Access Control, CCTV, serta sistem alarm proteksi radiasi fisik (Physical Protection Radiation) pada fasilitas medis internasional.",
-    gradientClass: "from-navy-dark to-navy",
-    highlightText: "International Healthcare Security",
-    badgeLabel: "Kuala Lumpur & Kota Kinabalu",
-  },
-  {
-    id: "pln-muara-karang",
-    category: "security",
-    categoryLabel: "Security System",
-    client: "PT. PLN Nusantara Power UP Muara Karang",
-    title: "Barrier Gate & CCTV Maintenance",
-    description:
-      "Perbaikan, pemasangan Barrier Gate, integrasi Visitor Management System dengan OCR plat nomor, serta pemeliharaan berkala CCTV & Gate Management System.",
-    gradientClass: "from-navy to-slate-800",
-    highlightText: "Multi-Year Contract (2025–2028)",
-    badgeLabel: "Barrier Gate, VMS & CCTV",
-  },
-  {
-    id: "shopee-office",
-    category: "security",
-    categoryLabel: "Security System",
-    client: "PT. Shopee Office",
-    title: "Instalasi Access Door Kantor Pusat",
-    description:
-      "Pemasangan dan konfigurasi sistem Access Door berstandar korporat untuk pengamanan akses ruang kerja di Sopo Del Tower Kuningan, Jakarta Selatan.",
-    gradientClass: "from-navy-light to-navy",
-    highlightText: "Sopo Del Tower Kuningan Lt. 28",
-    badgeLabel: "Corporate Office Access Control",
-  },
-  {
-    id: "krakatau-posco",
-    category: "integrator",
-    categoryLabel: "System Integrator",
-    client: "PT. Krakatau Posco",
-    title: "Fabrication Pondation & Pipe Rack 6KV",
-    description:
-      "Pekerjaan fabrikasi pondasi, pemasangan struktur baja Pipe Rack 6KV, serta dukungan pengadaan mekanikal & elektrikal di kawasan industri Cilegon.",
-    gradientClass: "from-slate-800 to-navy-dark",
-    highlightText: "Heavy Industrial Structure",
-    badgeLabel: "Foundation & Pipe Rack 6KV",
-  },
-];
 
 function normalizeCategory(cat: string): { key: "software" | "security" | "integrator"; label: string; gradient: string } {
   const upper = (cat || "").trim().toUpperCase();
@@ -134,8 +59,8 @@ export default function Portfolio({ data, categories }: PortfolioProps) {
   const [activeFilter, setActiveFilter] = useState<CategoryFilter>("all");
 
   const displayList: DisplayPortfolioItem[] = (() => {
-    if (data === undefined) {
-      return DEFAULT_PORTFOLIO_ITEMS;
+    if (!data || data.length === 0) {
+      return [];
     }
     return data.map((item, idx) => {
       const catInfo = normalizeCategory(item.category);
@@ -207,7 +132,13 @@ export default function Portfolio({ data, categories }: PortfolioProps) {
         </div>
 
         {/* Case Study Cards Grid */}
-        {filteredItems.length === 0 ? (
+        {displayList.length === 0 ? (
+          <div className="text-center py-16 bg-slate-50 rounded-3xl border border-dashed border-slate-200 p-8">
+            <p className="text-slate-600 font-medium text-sm">
+              Belum ada data portofolio proyek yang ditambahkan.
+            </p>
+          </div>
+        ) : filteredItems.length === 0 ? (
           <div className="text-center py-16 bg-slate-50 rounded-3xl border border-dashed border-slate-200 p-8">
             <p className="text-slate-600 font-medium text-sm">
               Belum ada proyek yang ditampilkan pada kategori ini.

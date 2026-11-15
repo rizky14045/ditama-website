@@ -5,7 +5,6 @@ import {
   sendInquiry,
   getPublicServiceCategories,
   ServiceCategoryData,
-  DEFAULT_SERVICE_CATEGORIES,
 } from "@/lib/api-compro";
 
 interface ContactModalProps {
@@ -18,10 +17,10 @@ export default function ContactModal({ isOpen, onClose, categories: initialCateg
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [categories, setCategories] = useState<ServiceCategoryData[]>(
-    initialCategories && initialCategories.length > 0 ? initialCategories : DEFAULT_SERVICE_CATEGORIES
+    initialCategories || []
   );
   const [serviceTopic, setServiceTopic] = useState(
-    categories[0]?.name || "Software Solution"
+    initialCategories && initialCategories[0] ? initialCategories[0].name : ""
   );
   const [projectDetail, setProjectDetail] = useState("");
   const [loading, setLoading] = useState(false);
